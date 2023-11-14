@@ -14,7 +14,6 @@ import { WebsiteController } from './upload/upload.controller'; // Update the pa
 @Module({
   imports: [
     ConfigModule.forRoot(),
-
     HttpModule,
     OtpModule,
     UploadModule, // Add the UploadModule here
