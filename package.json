@@ -22,7 +22,17 @@
     "@nestjs/core": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.5.5"
+    "rxjs": "^7.5.5",
+    "@nestjs/axios": "^3.0.0",
+    "@nestjs/config": "^3.0.0",
+    "@trpc/server": "^10.33.0",
+    "axios": "^1.4.0",
+    "class-validator": "^0.14.0",
+    "crypto": "^1.0.1",
+    "node-fetch": "^3.3.2",
+    "otp-generator": "^4.0.1",
+    "speakeasy": "^2.0.0",
+    "zod": "^3.21.4"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",
