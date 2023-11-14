@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
-import { TrpcModule } from '@server/trpc/trpc.module';
 import { UploadModule } from './upload/upload.module'; // Import the UploadModule
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -15,7 +14,7 @@ import { WebsiteController } from './upload/upload.controller'; // Update the pa
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    TrpcModule,
+
     HttpModule,
     OtpModule,
     UploadModule, // Add the UploadModule here
