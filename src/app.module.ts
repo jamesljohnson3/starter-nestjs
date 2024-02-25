@@ -10,6 +10,8 @@ import { OtpModule } from './otp/otp.module';
 import { UserModule } from './user/user.module'; // Import the UserModule
 import { CheckUserController } from './store/user.controller'; // Import the DataController
 import { WebsiteController } from './upload/upload.controller'; // Update the path accordingly
+import { ChatCompletionController } from './chat-completion/chat-completion.controller';
+import { ChatCompletionService } from './chat-completion/chat-completion.service';
 
 @Module({
   imports: [
@@ -26,8 +28,9 @@ import { WebsiteController } from './upload/upload.controller'; // Update the pa
   controllers: [
     AppController,
     CheckUserController,
-    WebsiteController, // Include the DataController here
+    WebsiteController,
+    ChatCompletionController, // Include the DataController here
   ],
-  providers: [AppService],
+  providers: [AppService, ChatCompletionService],
 })
 export class AppModule {}

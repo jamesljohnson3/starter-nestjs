@@ -30,6 +30,7 @@
     "crypto": "^1.0.1",
     "node-fetch": "^3.3.2",
     "otp-generator": "^4.0.1",
+    "pgml": "^0.10.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.5.5",
     "speakeasy": "^2.0.0",
