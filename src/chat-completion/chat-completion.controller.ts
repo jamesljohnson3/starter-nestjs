@@ -7,11 +7,6 @@ export class ChatCompletionController {
 
   @Post()
   async completeChat(@Body() messages: any[]) {
-    try {
-      const results = await this.chatCompletionService.completeChat(messages);
-      return results;
-    } catch (error) {
-      return { error: error.message };
-    }
+    return this.chatCompletionService.completeChat(messages);
   }
 }

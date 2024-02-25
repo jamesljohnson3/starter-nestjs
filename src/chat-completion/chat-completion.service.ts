@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import { Injectable } from '@nestjs/common';
-import pgml from 'pgml';
+const pgml = require('pgml'); // Import pgml using require
 
 @Injectable()
 export class ChatCompletionService {
