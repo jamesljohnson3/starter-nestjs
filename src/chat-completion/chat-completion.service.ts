@@ -4,14 +4,16 @@ const pgml = require('pgml'); // Import pgml using require
 
 @Injectable()
 export class ChatCompletionService {
-  async completeChat(messages: any) { // Change the type of messages to any
+  async completeChat(messages: any) {
+    // Change the type of messages to any
     try {
-      if (!Array.isArray(messages)) { // Check if messages is not an array
+      if (!Array.isArray(messages)) {
+        // Check if messages is not an array
         throw new Error('Messages must be an array');
       }
 
       const client = pgml.newOpenSourceAI();
-      const results = await client.chat_completions_create(
+      const results = client.chat_completions_create(
         'HuggingFaceH4/zephyr-7b-beta',
         messages,
       );
