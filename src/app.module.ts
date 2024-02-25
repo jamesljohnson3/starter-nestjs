@@ -12,6 +12,7 @@ import { CheckUserController } from './store/user.controller'; // Import the Dat
 import { WebsiteController } from './upload/upload.controller'; // Update the path accordingly
 import { ChatCompletionController } from './chat-completion/chat-completion.controller';
 import { ChatCompletionService } from './chat-completion/chat-completion.service';
+import { ChatCompletionModule } from './chat-completion/chat-completion.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { ChatCompletionService } from './chat-completion/chat-completion.service
       dest: './uploads', // Destination folder for uploaded files
     }),
     UserModule, // Add the UserModule here
+    ChatCompletionModule,
   ],
   controllers: [
     AppController,
