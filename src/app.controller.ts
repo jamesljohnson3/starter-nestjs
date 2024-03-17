@@ -62,6 +62,7 @@ export class AppController {
     if (!file) {
       return { message: 'No file uploaded' };
     }
+    console.log('File content:', file);
 
     // Split file content by lines
     const lines = file.buffer.toString().split(/\r*\n/).filter(Boolean);
