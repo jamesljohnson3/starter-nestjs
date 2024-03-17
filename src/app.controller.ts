@@ -59,7 +59,7 @@ export class AppController {
     return this.events.addClient(client, res);
   }
 
-  @Post('upload/:client')
+  @Post('uploads/:client')
   @Header('Access-Control-Allow-Origin', '*')
   @UseInterceptors(FileInterceptor('file'))
   async upload(
