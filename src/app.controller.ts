@@ -42,14 +42,7 @@ export class AppController {
     private readonly events: EventsService,
   ) {}
 
-  @Get()
-  @Header('Access-Control-Allow-Origin', '*')
-  getHello(@Res() res: Response): void {
-    res.send(this.appService.getHello());
-  }
-
   @Get('sse/:client')
-  @Header('Access-Control-Allow-Origin', '*')
   sse(
     @Param('client') client: string,
     @Req() req: Request,
@@ -60,13 +53,20 @@ export class AppController {
   }
 
   @Post('uploads/:client')
-  @Header('Access-Control-Allow-Origin', '*')
   @UseInterceptors(FileInterceptor('file'))
   async upload(
     @Param('client') client: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
+    // Check if file exists
+    if (!file) {
+      return { message: 'No file uploaded' };
+    }
+
+    // Split file content by lines
     const lines = file.buffer.toString().split(/\r*\n/).filter(Boolean);
+
+    // Iterate over each line and send SSE messages
     for (let i = 0; i < lines.length; i++) {
       this.events.sendMessage(
         client,
@@ -74,19 +74,21 @@ export class AppController {
         `${(i * 100) / lines.length}`,
       );
       this.events.sendMessage(client, 'data', lines[i]);
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50)); // Simulate delay (optional)
     }
+
+    // Send completion message
     this.events.sendMessage(client, 'progress', '100');
     this.events.sendMessage(
       client,
       'notification',
-      '✅ Success,File uploaded successfully',
+      '✅ Success, File uploaded successfully',
     );
+
     return { message: 'File uploaded successfully' };
   }
 
   @Get('csv')
-  @Header('Access-Control-Allow-Origin', '*')
   generateCsv(@Res() res: Response) {
     const filePath = './data.csv';
     let csvContent = 'name,email,phone,\n';
