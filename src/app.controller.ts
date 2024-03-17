@@ -41,6 +41,11 @@ export class AppController {
     private readonly events: EventsService,
   ) {}
 
+  @Get()
+  getHello(@Res() res: Response): void {
+    res.send(this.appService.getHello());
+  }
+
   @Get('sse/:client')
   sse(
     @Param('client') client: string,
