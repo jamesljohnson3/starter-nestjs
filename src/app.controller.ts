@@ -10,16 +10,15 @@ import {
   Res,
   UploadedFile,
   UseInterceptors,
-  Header,
 } from '@nestjs/common';
-import { AxiosResponse } from 'axios';
 import { HttpService } from '@nestjs/axios';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request, Response } from 'express';
-import { faker } from '@faker-js/faker';
-import * as fs from 'node:fs';
+import { faker } from '@faker-js/faker'; // Assuming you have installed faker-js
+import * as fs from 'fs';
 import { AppService } from './app.service';
 import { EventsService } from './events.service';
+import * as csvParser from 'csv-parser';
 
 interface ApiResponse {
   message: string;
@@ -52,7 +51,7 @@ export class AppController {
     return this.events.addClient(client, res);
   }
 
-  @Post('uploads/:client')
+  @Post('uploads/:client') // Corrected path declaration
   @UseInterceptors(FileInterceptor('file'))
   async upload(
     @Param('client') client: string,
@@ -62,35 +61,52 @@ export class AppController {
     if (!file) {
       return { message: 'No file uploaded' };
     }
-    console.log('File content:', file);
 
-    // Split file content by lines
-    const lines = file.buffer.toString().split(/\r*\n/).filter(Boolean);
-
-    // Iterate over each line and send SSE messages
-    for (let i = 0; i < lines.length; i++) {
-      this.events.sendMessage(
-        client,
-        'progress',
-        `${(i * 100) / lines.length}`,
-      );
-      this.events.sendMessage(client, 'data', lines[i]);
-      await new Promise((resolve) => setTimeout(resolve, 50)); // Simulate delay (optional)
+    // Check if file is not CSV
+    if (!file.mimetype.includes('csv')) {
+      throw new Error('Uploaded file is not a CSV');
     }
 
-    // Send completion message
-    this.events.sendMessage(client, 'progress', '100');
-    this.events.sendMessage(
-      client,
-      'notification',
-      '✅ Success, File uploaded successfully',
-    );
+    // Process CSV file
+    const data: any[] = [];
+    fs.createReadStream(file.path)
+      .pipe(csvParser())
+      .on('data', (row) => {
+        // Process each row
+        data.push(row);
+      })
+      .on('end', async () => {
+        // Added 'async' here
+        // Data processing completed
+        fs.unlinkSync(file.path); // Remove the uploaded file
+
+        // Here you can send the data to a service or manipulate it as needed
+        // For now, let's just return the data
+        // Also, send SSE messages
+        const lines = data.map((row) => JSON.stringify(row)); // Convert rows to strings
+        for (let i = 0; i < lines.length; i++) {
+          this.events.sendMessage(
+            client,
+            'progress',
+            `${(i * 100) / lines.length}`,
+          );
+          this.events.sendMessage(client, 'data', lines[i]);
+          await new Promise((resolve) => setTimeout(resolve, 50)); // Simulate delay (optional)
+        }
+
+        // Send completion message
+        this.events.sendMessage(client, 'progress', '100');
+        this.events.sendMessage(
+          client,
+          'notification',
+          '✅ Success, File uploaded successfully',
+        );
+      });
 
     return { message: 'File uploaded successfully' };
   }
-
   @Get('csv')
-  generateCsv(@Res() res: Response) {
+  generateCsv() {
     const filePath = './data.csv';
     let csvContent = 'name,email,phone,\n';
 
@@ -105,10 +121,8 @@ export class AppController {
     fs.writeFile(filePath, csvContent, (err) => {
       if (err) {
         console.error('Error writing CSV file:', err);
-        res.status(500).send('Error writing CSV file');
       } else {
         console.log(`CSV file generated successfully at ${filePath}`);
-        res.download(filePath); // Automatically download the generated CSV file
       }
     });
   }
