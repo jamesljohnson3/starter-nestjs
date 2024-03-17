@@ -13,6 +13,8 @@ import { WebsiteController } from './upload/upload.controller'; // Update the pa
 import { ChatCompletionController } from './chat-completion/chat-completion.controller';
 import { ChatCompletionService } from './chat-completion/chat-completion.service';
 import { ChatCompletionModule } from './chat-completion/chat-completion.module';
+import { AppGateway } from './app.gateway';
+import { DataService } from './data.service';
 
 @Module({
   imports: [
@@ -33,6 +35,6 @@ import { ChatCompletionModule } from './chat-completion/chat-completion.module';
     WebsiteController,
     ChatCompletionController, // Include the DataController here
   ],
-  providers: [AppService, ChatCompletionService],
+  providers: [AppService, DataService, ChatCompletionService, AppGateway],
 })
 export class AppModule {}

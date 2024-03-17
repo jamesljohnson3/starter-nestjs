@@ -13,6 +13,7 @@ interface PostData {
   field2: string;
   // Add more fields as needed
 }
+
 @Controller('actions')
 export class AppController {
   private readonly allowedUUID = '22-22-22'; // Replace with your authorized UUID
