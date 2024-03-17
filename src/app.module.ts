@@ -14,6 +14,7 @@ import { ChatCompletionController } from './chat-completion/chat-completion.cont
 import { ChatCompletionService } from './chat-completion/chat-completion.service';
 import { ChatCompletionModule } from './chat-completion/chat-completion.module';
 import { AppGateway } from './app.gateway';
+import { EventsService } from './events.service';
 
 @Module({
   imports: [
@@ -34,6 +35,6 @@ import { AppGateway } from './app.gateway';
     WebsiteController,
     ChatCompletionController, // Include the DataController here
   ],
-  providers: [AppService, ChatCompletionService, AppGateway],
+  providers: [EventsService, AppService, ChatCompletionService, AppGateway],
 })
 export class AppModule {}
