@@ -94,6 +94,9 @@ export class AppController {
           fs.unlinkSync(file.path);
 
           const tableData = data.map((row) => Object.values(row));
+          console.log('Received CSV data:', data); // Log the CSV data received
+          console.log('Received Table data:', tableData); // Log the CSV data received
+
           for (let i = 0; i < tableData.length; i++) {
             this.events.sendMessage(
               client,
