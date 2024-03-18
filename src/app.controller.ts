@@ -76,43 +76,38 @@ export class AppController {
     @UploadedFile() file: Express.Multer.File,
   ) {
     try {
+      // Check if file exists
       if (!file) {
         return { message: 'No file uploaded' };
       }
 
+      // Check if file is not CSV
       if (!file.mimetype.includes('csv')) {
         throw new Error('Uploaded file is not a CSV');
       }
 
+      // Process CSV file
       const data: any[] = [];
       fs.createReadStream(file.path)
         .pipe(csvParser())
         .on('data', (row) => {
+          // Process each row
           data.push(row);
         })
         .on('end', async () => {
-          fs.unlinkSync(file.path);
+          // Data processing completed
+          fs.unlinkSync(file.path); // Remove the uploaded file
 
-          const tableData = data.map((row) => Object.values(row));
-          console.log('Received CSV data:', data); // Log the CSV data received
-          console.log('Received Table data:', tableData); // Log the CSV data received
-
-          for (let i = 0; i < tableData.length; i++) {
-            this.events.sendMessage(
-              client,
-              'progress',
-              `${(i * 100) / tableData.length}`,
-            );
-
-            // Skip the first row if it's a header row
-            if (i !== 0) {
-              this.events.sendMessage(client, 'data', tableData[i].join(', '));
-            }
-
-            await new Promise((resolve) => setTimeout(resolve, 50));
+          // Process each row and send SSE events
+          for (let i = 0; i < data.length; i++) {
+            console.log('Received CSV data:', data); // Log the CSV data received
+            const rowData = Object.values(data[i]).join(', ');
+            console.log('Received Table data:', rowData); // Log the CSV data received
+            this.events.sendMessage(client, 'data', rowData);
+            await new Promise((resolve) => setTimeout(resolve, 50)); // Simulate delay (optional)
           }
 
-          this.events.sendMessage(client, 'progress', '100');
+          // Send completion message
           this.events.sendMessage(
             client,
             'notification',
@@ -120,12 +115,13 @@ export class AppController {
           );
         });
 
-      return { message: 'File uploaded successfully' };
+      return { message: 'File upload started' };
     } catch (error) {
-      console.error('Error processing file:', error.message);
+      console.error('Error uploading file:', error.message);
       throw error;
     }
   }
+
   @Get('csv')
   generateCsv() {
     const filePath = './data.csv';
