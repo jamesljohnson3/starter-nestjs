@@ -46,6 +46,7 @@ export class AppController {
     private httpService: HttpService,
     private readonly appService: AppService,
     private readonly events: EventsService,
+    private readonly eventsService: EventsService,
   ) {}
 
   private isValidUUID(uuid: string): boolean {
@@ -69,6 +70,21 @@ export class AppController {
     req.on('close', () => this.events.removeClient(client));
     return this.events.addClient(client, res);
   }
+
+  @Post('notifications/send/:client')
+  sendNotification(
+    @Param('client') client: string,
+    @Body() notificationData: any,
+  ) {
+    try {
+      this.eventsService.sendMessage(client, 'notification', notificationData);
+      return { message: 'Notification sent successfully' };
+    } catch (error) {
+      console.error('Error sending notification:', error.message);
+      throw new Error('Failed to send notification');
+    }
+  }
+
   @Post('uploads/:client') // Corrected path declaration
   @UseInterceptors(FileInterceptor('file'))
   async upload(
