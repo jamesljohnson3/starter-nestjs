@@ -48,12 +48,14 @@ export class EventsService {
    * @param {string} message - The message to send to the client.
    * @returns {void}
    */
-  sendMessage(id: string, type: EventType, message: string) {
+  sendMessage(id: string, type: EventType, data: any) {
     // Retrieve the response object for the specified client ID
     const res = this.clients.get(id);
     // If the response object exists, send the message as an SSE event
     if (res) {
-      res.write(`event: ${type}\ndata: ${message} \n\n`);
+      // Stringify any JavaScript objects into JSON format
+      const jsonData = typeof data === 'object' ? JSON.stringify(data) : data;
+      res.write(`event: ${type}\ndata: ${jsonData}\n\n`);
     }
   }
 
