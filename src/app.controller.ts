@@ -102,14 +102,14 @@ export class AppController {
         // Here you can send the data to a service or manipulate it as needed
         // For now, let's just return the data
         // Also, send SSE messages
-        const lines = data.map((row) => JSON.stringify(row)); // Convert rows to strings
-        for (let i = 0; i < lines.length; i++) {
+        const tableData = data.map((row) => Object.values(row)); // Convert objects to arrays
+        for (let i = 0; i < tableData.length; i++) {
           this.events.sendMessage(
             client,
             'progress',
-            `${(i * 100) / lines.length}`,
+            `${(i * 100) / tableData.length}`,
           );
-          this.events.sendMessage(client, 'data', lines[i]);
+          this.events.sendMessage(client, 'data', tableData[i].join(', ')); // Join values with commas
           await new Promise((resolve) => setTimeout(resolve, 50)); // Simulate delay (optional)
         }
 
