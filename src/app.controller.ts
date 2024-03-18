@@ -70,7 +70,7 @@ export class AppController {
     return this.events.addClient(client, res);
   }
 
-  @Post('uploads/:client') // Corrected path declaration
+  @Post('uploads/:client')
   @UseInterceptors(FileInterceptor('file'))
   async upload(
     @Param('client') client: string,
@@ -95,14 +95,13 @@ export class AppController {
         data.push(row);
       })
       .on('end', async () => {
-        // Added 'async' here
         // Data processing completed
         fs.unlinkSync(file.path); // Remove the uploaded file
 
         // Here you can send the data to a service or manipulate it as needed
         // For now, let's just return the data
         // Also, send SSE messages
-        const lines = data.map((row) => JSON.stringify(row)); // Convert rows to strings
+        const lines = data.map((row) => row); // No need to stringify
         for (let i = 0; i < lines.length; i++) {
           this.events.sendMessage(
             client,
