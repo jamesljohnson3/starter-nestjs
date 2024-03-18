@@ -100,7 +100,12 @@ export class AppController {
               'progress',
               `${(i * 100) / tableData.length}`,
             );
-            this.events.sendMessage(client, 'data', tableData[i].join(', '));
+
+            // Skip the first row if it's a header row
+            if (i !== 0) {
+              this.events.sendMessage(client, 'data', tableData[i].join(', '));
+            }
+
             await new Promise((resolve) => setTimeout(resolve, 50));
           }
 
@@ -118,7 +123,6 @@ export class AppController {
       throw error;
     }
   }
-
   @Get('csv')
   generateCsv() {
     const filePath = './data.csv';
