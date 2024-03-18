@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import {
   Controller,
   Get,
@@ -10,6 +11,7 @@ import {
   Res,
   UploadedFile,
   UseInterceptors,
+  Redirect,
 } from '@nestjs/common';
 import * as csvParser from 'csv-parser';
 import { HttpService } from '@nestjs/axios';
@@ -56,9 +58,8 @@ export class AppController {
   }
 
   @Get()
-  getHello(): string {
-    return this.appService.getHello();
-  }
+  @Redirect('https://global.unlimitpotential.com/contact', 301)
+  redirectToExternalWebsite() {}
 
   @Get('sse/:client')
   sse(
@@ -69,58 +70,28 @@ export class AppController {
     req.on('close', () => this.events.removeClient(client));
     return this.events.addClient(client, res);
   }
-
-  @Post('uploads/:client')
+  @Post('upload/:client')
   @UseInterceptors(FileInterceptor('file'))
   async upload(
     @Param('client') client: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    // Check if file exists
-    if (!file) {
-      return { message: 'No file uploaded' };
+    const lines = file.buffer.toString().split(/\r*\n/).filter(Boolean);
+    for (let i = 0; i < lines.length; i++) {
+      this.events.sendMessage(
+        client,
+        'progress',
+        `${(i * 100) / lines.length}`,
+      );
+      this.events.sendMessage(client, 'data', lines[i]);
+      await new Promise((resolve) => setTimeout(resolve, 50));
     }
-
-    // Check if file is not CSV
-    if (!file.mimetype.includes('csv')) {
-      throw new Error('Uploaded file is not a CSV');
-    }
-
-    // Process CSV file
-    const data: any[] = [];
-    fs.createReadStream(file.path)
-      .pipe(csvParser())
-      .on('data', (row) => {
-        // Process each row
-        data.push(row);
-      })
-      .on('end', async () => {
-        // Data processing completed
-        fs.unlinkSync(file.path); // Remove the uploaded file
-
-        // Here you can send the data to a service or manipulate it as needed
-        // For now, let's just return the data
-        // Also, send SSE messages
-        const lines = data.map((row) => row); // No need to stringify
-        for (let i = 0; i < lines.length; i++) {
-          this.events.sendMessage(
-            client,
-            'progress',
-            `${(i * 100) / lines.length}`,
-          );
-          this.events.sendMessage(client, 'data', lines[i]);
-          await new Promise((resolve) => setTimeout(resolve, 50)); // Simulate delay (optional)
-        }
-
-        // Send completion message
-        this.events.sendMessage(client, 'progress', '100');
-        this.events.sendMessage(
-          client,
-          'notification',
-          '✅ Success, File uploaded successfully',
-        );
-      });
-
+    this.events.sendMessage(client, 'progress', '100');
+    this.events.sendMessage(
+      client,
+      'notification',
+      '✅ Success,File uploaded successfully',
+    );
     return { message: 'File uploaded successfully' };
   }
 
