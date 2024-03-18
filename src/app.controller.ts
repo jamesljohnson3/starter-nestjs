@@ -69,60 +69,54 @@ export class AppController {
     req.on('close', () => this.events.removeClient(client));
     return this.events.addClient(client, res);
   }
-
   @Post('uploads/:client') // Corrected path declaration
   @UseInterceptors(FileInterceptor('file'))
   async upload(
     @Param('client') client: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    // Check if file exists
-    if (!file) {
-      return { message: 'No file uploaded' };
-    }
+    try {
+      if (!file) {
+        return { message: 'No file uploaded' };
+      }
 
-    // Check if file is not CSV
-    if (!file.mimetype.includes('csv')) {
-      throw new Error('Uploaded file is not a CSV');
-    }
+      if (!file.mimetype.includes('csv')) {
+        throw new Error('Uploaded file is not a CSV');
+      }
 
-    // Process CSV file
-    const data: any[] = [];
-    fs.createReadStream(file.path)
-      .pipe(csvParser())
-      .on('data', (row) => {
-        // Process each row
-        data.push(row);
-      })
-      .on('end', async () => {
-        // Added 'async' here
-        // Data processing completed
-        fs.unlinkSync(file.path); // Remove the uploaded file
+      const data: any[] = [];
+      fs.createReadStream(file.path)
+        .pipe(csvParser())
+        .on('data', (row) => {
+          data.push(row);
+        })
+        .on('end', async () => {
+          fs.unlinkSync(file.path);
 
-        // Here you can send the data to a service or manipulate it as needed
-        // For now, let's just return the data
-        // Also, send SSE messages
-        const tableData = data.map((row) => Object.values(row)); // Convert objects to arrays
-        for (let i = 0; i < tableData.length; i++) {
+          const tableData = data.map((row) => Object.values(row));
+          for (let i = 0; i < tableData.length; i++) {
+            this.events.sendMessage(
+              client,
+              'progress',
+              `${(i * 100) / tableData.length}`,
+            );
+            this.events.sendMessage(client, 'data', tableData[i].join(', '));
+            await new Promise((resolve) => setTimeout(resolve, 50));
+          }
+
+          this.events.sendMessage(client, 'progress', '100');
           this.events.sendMessage(
             client,
-            'progress',
-            `${(i * 100) / tableData.length}`,
+            'notification',
+            '✅ Success, File uploaded successfully',
           );
-          this.events.sendMessage(client, 'data', tableData[i].join(', ')); // Join values with commas
-          await new Promise((resolve) => setTimeout(resolve, 50)); // Simulate delay (optional)
-        }
+        });
 
-        // Send completion message
-        this.events.sendMessage(client, 'progress', '100');
-        this.events.sendMessage(
-          client,
-          'notification',
-          '✅ Success, File uploaded successfully',
-        );
-      });
-
-    return { message: 'File uploaded successfully' };
+      return { message: 'File uploaded successfully' };
+    } catch (error) {
+      console.error('Error processing file:', error.message);
+      throw error;
+    }
   }
 
   @Get('csv')
