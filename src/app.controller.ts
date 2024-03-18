@@ -76,7 +76,11 @@ export class AppController {
     @Body() notificationData: { title: string },
   ) {
     try {
-      this.eventsService.sendMessage(client, 'notification', notificationData);
+      this.eventsService.sendMessage(
+        client,
+        'notification',
+        notificationData.title,
+      ); // Pass only the title
       return {
         title: notificationData.title,
       };
