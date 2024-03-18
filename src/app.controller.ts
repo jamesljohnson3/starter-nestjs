@@ -70,15 +70,16 @@ export class AppController {
     req.on('close', () => this.events.removeClient(client));
     return this.events.addClient(client, res);
   }
-
   @Post('notifications/send/:client')
   sendNotification(
     @Param('client') client: string,
-    @Body() notificationData: any,
+    @Body() notificationData: { title: string },
   ) {
     try {
       this.eventsService.sendMessage(client, 'notification', notificationData);
-      return { message: 'Notification sent successfully' };
+      return {
+        title: notificationData.title,
+      };
     } catch (error) {
       console.error('Error sending notification:', error.message);
       throw new Error('Failed to send notification');
