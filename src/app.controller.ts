@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import {
   Controller,
   Get,
@@ -11,7 +10,6 @@ import {
   Res,
   UploadedFile,
   UseInterceptors,
-  Redirect,
 } from '@nestjs/common';
 import * as csvParser from 'csv-parser';
 import { HttpService } from '@nestjs/axios';
@@ -21,7 +19,6 @@ import { faker } from '@faker-js/faker';
 import * as fs from 'node:fs';
 import { AppService } from './app.service';
 import { EventsService } from './events.service';
-import { v4 as uuidv4 } from 'uuid';
 
 interface ApiResponse {
   message: string;
@@ -59,8 +56,9 @@ export class AppController {
   }
 
   @Get()
-  @Redirect('https://global.unlimitpotential.com/contact', 301)
-  redirectToExternalWebsite() {}
+  getHello(): string {
+    return this.appService.getHello();
+  }
 
   @Get('sse/:client')
   sse(
@@ -72,28 +70,58 @@ export class AppController {
     return this.events.addClient(client, res);
   }
 
-  @Post('uploads/:client')
+  @Post('uploads/:client') // Corrected path declaration
   @UseInterceptors(FileInterceptor('file'))
   async upload(
     @Param('client') client: string,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    const lines = file.buffer.toString().split(/\r*\n/).filter(Boolean);
-    for (let i = 0; i < lines.length; i++) {
-      this.events.sendMessage(
-        client,
-        'progress',
-        `${(i * 100) / lines.length}`,
-      );
-      this.events.sendMessage(client, 'data', lines[i]);
-      await new Promise((resolve) => setTimeout(resolve, 50));
+    // Check if file exists
+    if (!file) {
+      return { message: 'No file uploaded' };
     }
-    this.events.sendMessage(client, 'progress', '100');
-    this.events.sendMessage(
-      client,
-      'notification',
-      '✅ Success,File uploaded successfully',
-    );
+
+    // Check if file is not CSV
+    if (!file.mimetype.includes('csv')) {
+      throw new Error('Uploaded file is not a CSV');
+    }
+
+    // Process CSV file
+    const data: any[] = [];
+    fs.createReadStream(file.path)
+      .pipe(csvParser())
+      .on('data', (row) => {
+        // Process each row
+        data.push(row);
+      })
+      .on('end', async () => {
+        // Added 'async' here
+        // Data processing completed
+        fs.unlinkSync(file.path); // Remove the uploaded file
+
+        // Here you can send the data to a service or manipulate it as needed
+        // For now, let's just return the data
+        // Also, send SSE messages
+        const lines = data.map((row) => JSON.stringify(row)); // Convert rows to strings
+        for (let i = 0; i < lines.length; i++) {
+          this.events.sendMessage(
+            client,
+            'progress',
+            `${(i * 100) / lines.length}`,
+          );
+          this.events.sendMessage(client, 'data', lines[i]);
+          await new Promise((resolve) => setTimeout(resolve, 50)); // Simulate delay (optional)
+        }
+
+        // Send completion message
+        this.events.sendMessage(client, 'progress', '100');
+        this.events.sendMessage(
+          client,
+          'notification',
+          '✅ Success, File uploaded successfully',
+        );
+      });
+
     return { message: 'File uploaded successfully' };
   }
 
@@ -201,49 +229,5 @@ export class AppController {
     }
 
     return response;
-  }
-}
-
-@Controller('media')
-export class MediaController {
-  constructor(
-    private httpService: HttpService,
-    private eventsService: EventsService, // Inject the EventsService
-  ) {}
-
-  @Post('upload') // Updated route to 'upload'
-  @UseInterceptors(FileInterceptor('file'))
-  async uploadMedia(@UploadedFile() file: Express.Multer.File) {
-    try {
-      if (!file) {
-        return { success: false, message: 'No file uploaded' };
-      }
-
-      // Save the file internally (you can save it to a database, filesystem, etc.)
-      const fileId = uuidv4(); // Generate a unique ID for the file
-      // Implement your logic to save the file (e.g., store it in a database or filesystem)
-
-      // Upload the saved file to another API via webhook
-      const webhookUrl =
-        'https://snap-jj3media-icloud-com.eu-1.celonis.cloud/ems-automation/public/api/root/a0e537b1-b88f-434c-a659-0cadea64b085/hook/acgonuudtu441k97whj3xp8ykm9pme2s'; // Replace with your webhook URL
-      const response = await this.httpService
-        .post(webhookUrl, { fileId, filename: file.originalname })
-        .toPromise();
-
-      // Handle response from the webhook
-      console.log('Webhook response:', response.data);
-
-      // Send notification message (replace 'client' with the appropriate client ID)
-      this.eventsService.sendMessage(
-        'client',
-        'notification',
-        '✅ Success, File uploaded successfully',
-      );
-
-      return { success: true, message: 'Media uploaded successfully', fileId };
-    } catch (error) {
-      console.error('Error uploading media:', error.message);
-      return { success: false, message: 'Error uploading media' };
-    }
   }
 }
