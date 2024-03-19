@@ -16,7 +16,15 @@ import { ChatCompletionModule } from './chat-completion/chat-completion.module';
 import { AppGateway } from './app.gateway';
 import { EventsService } from './events.service';
 import { MediaController } from './media.controller'; // Import the MediaController
-
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
+@Module({
+  imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'), // Specify the directory where your static files are stored
+    }),
+  ],
+})
 @Module({
   imports: [
     ConfigModule.forRoot(),
