@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/adjacent-overload-signatures */
 import {
   Controller,
   Post,
@@ -23,9 +22,12 @@ export class MediaController {
     private eventsService: EventsService, // Inject the EventsService
   ) {}
 
-  @Post('upload') // Updated route to 'upload'
+  @Post('upload/:client') // Updated route to include the client ID
   @UseInterceptors(FileInterceptor('file'))
-  async uploadMedia2(@UploadedFile() file: Express.Multer.File) {
+  async uploadMedia(
+    @UploadedFile() file: Express.Multer.File,
+    @Param('client') client: string, // Extract the client ID from the URL
+  ) {
     try {
       if (!file) {
         return { success: false, message: 'No file uploaded' };
@@ -39,7 +41,7 @@ export class MediaController {
       const webhookUrl =
         'https://snap-jj3media-icloud-com.eu-1.celonis.cloud/ems-automation/public/api/root/a0e537b1-b88f-434c-a659-0cadea64b085/hook/acgonuudtu441k97whj3xp8ykm9pme2s'; // Replace with your webhook URL
       const response = await this.httpService
-        .post(webhookUrl, { fileId, filename: file.originalname })
+        .post(webhookUrl, { fileId, filename: file.originalname, client }) // Include the client ID in the payload
         .toPromise();
 
       // Handle response from the webhook
@@ -47,7 +49,7 @@ export class MediaController {
 
       // Send notification message
       this.eventsService.sendMessage(
-        'client', // Replace 'client' with the appropriate client ID
+        client, // Use the provided client ID
         'notification',
         '✅ Success, File uploaded successfully',
       );
@@ -63,12 +65,6 @@ export class MediaController {
   getMediaById(@Param('id') id: string) {
     // Implement logic to fetch media by ID
     return `Media with ID ${id}`;
-  }
-
-  @Post() // Route to upload media
-  uploadMedia(@Body() mediaData: any) {
-    // Implement logic to upload media
-    return `Media uploaded: ${JSON.stringify(mediaData)}`;
   }
 
   // Reusing the SSE endpoint from the AppController
