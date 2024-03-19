@@ -15,7 +15,7 @@ import { ChatCompletionService } from './chat-completion/chat-completion.service
 import { ChatCompletionModule } from './chat-completion/chat-completion.module';
 import { AppGateway } from './app.gateway';
 import { EventsService } from './events.service';
-
+import { MediaController } from './media.controller';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -28,6 +28,7 @@ import { EventsService } from './events.service';
     }),
     UserModule, // Add the UserModule here
     ChatCompletionModule,
+    MediaController,
   ],
   controllers: [
     AppController,
