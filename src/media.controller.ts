@@ -14,7 +14,7 @@ import * as fs from 'fs';
 export class MediaController {
   constructor(private httpService: HttpService) {}
 
-  @Post('upload/:client') // Updated route to include the client ID
+  @Post('uploads/:client') // Updated route to include the client ID
   @UseInterceptors(FileInterceptor('file'))
   async uploadMedia(
     @UploadedFile() file: Express.Multer.File,
