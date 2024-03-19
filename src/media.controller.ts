@@ -11,7 +11,6 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { v4 as uuidv4 } from 'uuid';
-import { Request, Response } from 'express';
 import { EventsService } from './events.service';
 import { HttpService } from '@nestjs/axios';
 
@@ -22,7 +21,7 @@ export class MediaController {
     private eventsService: EventsService, // Inject the EventsService
   ) {}
 
-  @Post('upload/:client') // Updated route to include the client ID
+  @Post('uploads/:client') // Updated route to include the client ID
   @UseInterceptors(FileInterceptor('file'))
   async uploadMedia(
     @UploadedFile() file: Express.Multer.File,
@@ -65,16 +64,5 @@ export class MediaController {
   getMediaById(@Param('id') id: string) {
     // Implement logic to fetch media by ID
     return `Media with ID ${id}`;
-  }
-
-  // Reusing the SSE endpoint from the AppController
-  @Get('sse/:client')
-  sse(
-    @Param('client') client: string,
-    @Req() req: Request,
-    @Res() res: Response,
-  ) {
-    req.on('close', () => this.eventsService.removeClient(client));
-    return this.eventsService.addClient(client, res);
   }
 }
