@@ -14,7 +14,7 @@ import * as fs from 'fs';
 export class MediaController {
   constructor(private httpService: HttpService) {}
 
-  @Post('uploads/:client') // Updated route to include the client ID
+  @Post('upload/:client') // Updated route to include the client ID
   @UseInterceptors(FileInterceptor('file'))
   async uploadMedia(
     @UploadedFile() file: Express.Multer.File,
@@ -27,11 +27,6 @@ export class MediaController {
 
       // Read the file into a buffer
       const fileBuffer = fs.readFileSync(file.path);
-
-      // Save the file to persistent storage (local file system)
-      const fileId = uuidv4(); // Generate a unique ID for the file
-      const storagePath = `./uploads/${fileId}-${file.originalname}`;
-      fs.writeFileSync(storagePath, fileBuffer);
 
       // Delete the temporary file created by multer
       fs.unlinkSync(file.path);
