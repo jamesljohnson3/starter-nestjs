@@ -31,9 +31,7 @@ export class EventsService {
       'Access-Control-Allow-Origin': '*',
     });
     // Send an initial SSE event to the client
-    return res.write(
-      `event: notification\ndata: ✅ Success,Client connected \n\n`,
-    );
+    return res.write(`event: handshake\ndata: ✅ Handshake successful\n\n`);
   }
 
   /**
