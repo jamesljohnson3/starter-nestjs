@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { HttpModule } from '@nestjs/axios';
-import { GraphQLModule } from '@nestjs/graphql'; // Import the GraphQLModule
 import { UploadModule } from './upload/upload.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -30,7 +29,6 @@ import { MediaController } from './media.controller';
     }),
     UserModule,
     ChatCompletionModule,
-    GraphQLModule.forRoot({ autoSchemaFile: true }), // Configure GraphQLModule here
   ],
   controllers: [
     AppController,
