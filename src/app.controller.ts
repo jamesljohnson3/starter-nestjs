@@ -70,6 +70,25 @@ export class AppController {
     req.on('close', () => this.events.removeClient(client));
     return this.events.addClient(client, res);
   }
+
+  @Post('ai-events/send/:client')
+  sendAIEvent(
+    @Param('client') client: string,
+    @Body() eventData: any, // Adjust the type as per your AI event structure
+  ) {
+    try {
+      this.eventsService.sendMessage(
+        client,
+        'ai-event',
+        eventData, // Pass the AI event data to sendMessage
+      );
+      return eventData; // Return the event data back as confirmation
+    } catch (error) {
+      console.error('Error sending AI event:', error.message);
+      throw new Error('Failed to send AI event');
+    }
+  }
+
   @Post('notifications/send/:client')
   sendNotification(
     @Param('client') client: string,

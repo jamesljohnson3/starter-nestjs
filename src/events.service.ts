@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Response } from 'express';
 
-type EventType = 'notification' | 'data' | 'progress';
+type EventType = 'notification' | 'data' | 'progress' | 'ai-event';
 
 @Injectable()
 export class EventsService {
