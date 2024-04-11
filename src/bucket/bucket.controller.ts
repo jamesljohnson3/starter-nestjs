@@ -9,11 +9,11 @@ export class BucketController {
       // Configure Scaleway S3 client (AWS SDK version 3)
       const s3 = new S3Client({
         credentials: {
-          accessKeyId: 'SCWYVGM43X872NJ79E5H', // Replace with your Scaleway access key
-          secretAccessKey: 'f7f718d4-201e-44ae-bc51-38211ee6e22e', // Replace with your Scaleway secret key
+          accessKeyId: '004c793eb828ace0000000004', // Replace with your Scaleway access key
+          secretAccessKey: 'K004H1NvDQ+d9fD9sy9iBsYzd8f4/r8', // Replace with your Scaleway secret key
         },
-        region: 'fr-par', // Replace with your desired region
-        endpoint: 'https://s3.fr-par.scw.cloud', // Correct Scaleway S3 endpoint
+        region: 'us-west-004', // Replace with your desired region
+        endpoint: 'https://s3.us-west-004.backblazeb2.com', // Correct Scaleway S3 endpoint
       });
 
       // Create a new bucket
