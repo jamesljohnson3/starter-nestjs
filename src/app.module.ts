@@ -21,6 +21,7 @@ import { UploaderController } from './uploader/uploader.controller'; // Import M
 import { ChunkUploadService } from './chunk-upload/chunk-upload.service';
 import { ChunkUploadController } from './chunk-upload/chunk-upload.controller';
 import { VideoModule } from './video/video.module';
+import { MboxToPdfController } from './mbox-to-pdf/mbox-to-pdf.controller';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { VideoModule } from './video/video.module';
     MboxController,
     UploaderController,
     ChunkUploadController,
+    MboxToPdfController,
   ],
   providers: [
     EventsService,

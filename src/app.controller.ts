@@ -19,6 +19,8 @@ import { faker } from '@faker-js/faker';
 import * as fs from 'node:fs';
 import { AppService } from './app.service';
 import { EventsService } from './events.service';
+import * as fastcsv from 'fast-csv';
+import { DataService } from './data/data.service';
 
 interface ApiResponse {
   message: string;
@@ -47,6 +49,7 @@ export class AppController {
     private readonly appService: AppService,
     private readonly events: EventsService,
     private readonly eventsService: EventsService,
+    private readonly dataService: DataService,
   ) {}
 
   private isValidUUID(uuid: string): boolean {
@@ -159,6 +162,26 @@ export class AppController {
     } catch (error) {
       console.error('Error uploading file:', error.message);
       throw error;
+    }
+  }
+  @Post('upload-csv') // Endpoint for uploading CSV file
+  @UseInterceptors(FileInterceptor('file')) // Use multer or similar middleware for handling file uploads
+  async uploadCSV(@UploadedFile() file, @Res() res: Response) {
+    try {
+      // Process the uploaded CSV file
+      const parsedData = await this.dataService.processUploadedCSV(file); // Implement this method in your DataService
+
+      // Stream processed data to client
+      res.setHeader('Content-Type', 'text/csv');
+      res.setHeader('Content-Disposition', 'attachment; filename=data.csv');
+
+      const csvStream = fastcsv.format({ headers: true, writeHeaders: true });
+      csvStream.pipe(res);
+
+      parsedData.forEach((item) => csvStream.write(item));
+      csvStream.end();
+    } catch (error) {
+      res.status(500).send('Error processing uploaded data');
     }
   }
 
