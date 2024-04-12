@@ -20,6 +20,7 @@ import { MboxController } from './mbox/mbox.controller'; // Import MboxControlle
 import { UploaderController } from './uploader/uploader.controller'; // Import MboxController
 import { ChunkUploadService } from './chunk-upload/chunk-upload.service';
 import { ChunkUploadController } from './chunk-upload/chunk-upload.controller';
+import { VideoModule } from './video/video.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ChunkUploadController } from './chunk-upload/chunk-upload.controller';
     }),
     UserModule,
     ChatCompletionModule,
+    VideoModule,
   ],
   controllers: [
     AppController,
