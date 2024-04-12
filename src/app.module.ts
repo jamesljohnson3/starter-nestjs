@@ -26,6 +26,7 @@ import { DataService } from './data/data.service';
 import { DataModule } from './data/data.module';
 import { EmailController } from './emails/email.controller';
 import { MboxParserService } from './services/mbox-parser.service';
+import { EmailStreamModule } from './email-stream/email-stream.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { MboxParserService } from './services/mbox-parser.service';
     ChatCompletionModule,
     VideoModule,
     DataModule,
+    EmailStreamModule,
   ],
   controllers: [
     AppController,
