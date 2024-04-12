@@ -37,6 +37,7 @@ import { MboxController } from './mbox/mbox.controller'; // Import MboxControlle
     WebsiteController,
     ChatCompletionController,
     MediaController,
+    MboxController,
   ],
   providers: [EventsService, AppService, ChatCompletionService, AppGateway],
 })
