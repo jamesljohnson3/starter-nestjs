@@ -13,7 +13,7 @@ export class EmailStreamController {
       res.setHeader('Content-Type', 'application/octet-stream');
       res.setHeader(
         'Content-Disposition',
-        'attachment; filename="large_file.dat"',
+        'attachment; filename="email_data.mbox"',
       );
       dataStream.pipe(res);
     } catch (error) {
