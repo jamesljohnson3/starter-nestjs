@@ -10,6 +10,8 @@ export class EmailController {
   async getEmails(
     @Query('page') page = 1, // Default to page 1
     @Query('limit') limit = 10, // Default to 10 items per page
+    @Query('search') search = '', // Default to empty string for search query
+    @Query('filterFrom') filterFrom = '', // Default to empty string for filtering by 'from' field
   ) {
     try {
       // Fetch mbox file from the URL
@@ -19,7 +21,21 @@ export class EmailController {
 
       // Parse mbox file into individual email messages
       const mboxData = response.data;
-      const emails = parseMbox(mboxData); // Implement this function
+      let emails = parseMbox(mboxData); // Implement this function
+
+      // Search filter: filter emails by search query in 'from' or 'subject' fields
+      if (search) {
+        const searchRegex = new RegExp(search, 'i'); // Case insensitive search
+        emails = emails.filter(
+          (email) =>
+            searchRegex.test(email.from) || searchRegex.test(email.subject),
+        );
+      }
+
+      // Filter by 'from' field
+      if (filterFrom) {
+        emails = emails.filter((email) => email.from === filterFrom);
+      }
 
       // Calculate start and end indexes for the current page
       const startIndex = (page - 1) * limit;
