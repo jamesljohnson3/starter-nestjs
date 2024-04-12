@@ -5,7 +5,8 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { createReadStream, promises as fsPromises } from 'fs';
+import { diskStorage } from 'multer';
+import * as fs from 'fs';
 import * as readline from 'readline';
 
 @Controller('mbox')
@@ -24,7 +25,7 @@ export class MboxController {
   async parseMbox(filePath: string): Promise<string> {
     return new Promise<string>((resolve, reject) => {
       const reader = readline.createInterface({
-        input: createReadStream(filePath, { encoding: 'utf-8' }),
+        input: fs.createReadStream(filePath, { encoding: 'utf-8' }),
       });
       let mboxData = '';
 

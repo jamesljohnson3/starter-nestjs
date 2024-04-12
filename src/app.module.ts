@@ -17,6 +17,9 @@ import { AppGateway } from './app.gateway';
 import { EventsService } from './events.service';
 import { MediaController } from './media.controller';
 import { MboxController } from './mbox/mbox.controller'; // Import MboxController
+import { UploaderController } from './uploader/uploader.controller'; // Import MboxController
+import { ChunkUploadService } from './chunk-upload/chunk-upload.service';
+import { ChunkUploadController } from './chunk-upload/chunk-upload.controller';
 
 @Module({
   imports: [
@@ -38,7 +41,15 @@ import { MboxController } from './mbox/mbox.controller'; // Import MboxControlle
     ChatCompletionController,
     MediaController,
     MboxController,
+    UploaderController,
+    ChunkUploadController,
   ],
-  providers: [EventsService, AppService, ChatCompletionService, AppGateway],
+  providers: [
+    EventsService,
+    AppService,
+    ChatCompletionService,
+    AppGateway,
+    ChunkUploadService,
+  ],
 })
 export class AppModule {}
