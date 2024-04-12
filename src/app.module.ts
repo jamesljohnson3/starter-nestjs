@@ -23,6 +23,8 @@ import { ChunkUploadController } from './chunk-upload/chunk-upload.controller';
 import { VideoModule } from './video/video.module';
 import { MboxToPdfController } from './mbox-to-pdf/mbox-to-pdf.controller';
 import { DataService } from './data/data.service';
+import { DataModule } from './data/data.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -36,7 +38,7 @@ import { DataService } from './data/data.service';
     UserModule,
     ChatCompletionModule,
     VideoModule,
-    DataService,
+    DataModule,
   ],
   controllers: [
     AppController,

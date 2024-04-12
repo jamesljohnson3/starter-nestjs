@@ -1,3 +1,5 @@
+// data.service.ts
+
 import { Injectable } from '@nestjs/common';
 import * as fs from 'fs';
 import * as MailParser from 'mailparser';
