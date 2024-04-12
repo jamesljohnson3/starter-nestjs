@@ -36,6 +36,7 @@ import { DataService } from './data/data.service';
     UserModule,
     ChatCompletionModule,
     VideoModule,
+    DataService,
   ],
   controllers: [
     AppController,
