@@ -24,6 +24,8 @@ import { VideoModule } from './video/video.module';
 import { MboxToPdfController } from './mbox-to-pdf/mbox-to-pdf.controller';
 import { DataService } from './data/data.service';
 import { DataModule } from './data/data.module';
+import { EmailController } from './emails/email.controller';
+import { MboxParserService } from './services/mbox-parser.service';
 
 @Module({
   imports: [
@@ -50,6 +52,7 @@ import { DataModule } from './data/data.module';
     UploaderController,
     ChunkUploadController,
     MboxToPdfController,
+    EmailController,
   ],
   providers: [
     EventsService,
@@ -58,6 +61,7 @@ import { DataModule } from './data/data.module';
     AppGateway,
     ChunkUploadService,
     DataService,
+    MboxParserService,
   ],
 })
 export class AppModule {}
