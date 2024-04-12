@@ -1,6 +1,5 @@
 // chunk-upload.controller.ts
-
-import { Controller, Post, Body } from '@nestjs/common';
+import { Controller, Post, Body, Headers } from '@nestjs/common';
 import { ChunkUploadService } from './chunk-upload.service';
 
 @Controller('upload-chunk')
@@ -12,7 +11,13 @@ export class ChunkUploadController {
     @Body('chunk') chunk: Buffer,
     @Body('offset') offset: number,
     @Body('fileName') fileName: string,
+    @Headers('content-length') contentLength: number,
   ): Promise<void> {
-    await this.chunkUploadService.handleChunk(chunk, offset, fileName);
+    await this.chunkUploadService.handleChunk(
+      chunk,
+      offset,
+      fileName,
+      contentLength,
+    );
   }
 }

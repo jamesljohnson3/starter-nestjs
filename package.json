@@ -34,6 +34,7 @@
     "@nestjs/websockets": "^10.3.3",
     "@trpc/server": "^10.33.0",
     "apollo-server-express": "^3.13.0",
+    "aws-sdk": "^2.1599.0",
     "axios": "^1.4.0",
     "class-validator": "^0.14.0",
     "crypto": "^1.0.1",
