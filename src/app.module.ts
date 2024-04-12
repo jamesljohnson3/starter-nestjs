@@ -16,6 +16,7 @@ import { ChatCompletionModule } from './chat-completion/chat-completion.module';
 import { AppGateway } from './app.gateway';
 import { EventsService } from './events.service';
 import { MediaController } from './media.controller';
+import { MboxController } from './mbox/mbox.controller'; // Import MboxController
 
 @Module({
   imports: [
