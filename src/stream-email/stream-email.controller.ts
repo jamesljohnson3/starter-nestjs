@@ -104,3 +104,39 @@ export class StreamEmailController3 {
     }
   }
 }
+
+@Controller('stream-email4')
+export class StreamEmailController4 {
+  @Get()
+  async getEmailStream(
+    @Query('chunkIndex') chunkIndex: number,
+    @Res() res: Response,
+  ) {
+    try {
+      const fileUrl =
+        'https://ok767777.s3.us-west-004.backblazeb2.com/All+mail+Including+Spam+and+Trash.mbox';
+      const response = await axios.get(fileUrl, { responseType: 'stream' });
+
+      res.setHeader('Content-Type', 'text/plain');
+
+      // Stream file in chunks of 5KB
+      let totalBytesRead = 0;
+      response.data.on('data', (chunk: Buffer) => {
+        totalBytesRead += chunk.length;
+        if (totalBytesRead > 5000) {
+          // If total bytes read exceeds 5KB, end the response
+          res.end();
+        } else {
+          res.write(chunk);
+        }
+      });
+
+      response.data.on('end', () => {
+        res.end();
+      });
+    } catch (error) {
+      console.error('Error streaming file:', error);
+      res.status(500).send({ error: 'Failed to stream file' });
+    }
+  }
+}
