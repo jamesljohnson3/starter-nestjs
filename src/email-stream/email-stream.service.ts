@@ -4,7 +4,8 @@ import axios from 'axios';
 @Injectable()
 export class EmailStreamService {
   async getEmailStream() {
-    const fileUrl = 'https://f004.backblazeb2.com/file/ok767777/Sent.mbox';
+    const fileUrl =
+      'https://ok767777.s3.us-west-004.backblazeb2.com/All+mail+Including+Spam+and+Trash.mbox';
 
     try {
       const response = await axios.get(fileUrl, { responseType: 'stream' });
