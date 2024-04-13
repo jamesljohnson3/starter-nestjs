@@ -1,5 +1,5 @@
 // stream-email.controller.ts
-import { Controller, Get, Query, Res } from '@nestjs/common';
+import { Controller, Get, HttpStatus, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
 import * as AWS from 'aws-sdk';
 import axios from 'axios';
@@ -60,6 +60,7 @@ export class StreamEmailController2 {
     }
   }
 }
+
 @Controller('stream-email3')
 export class StreamEmailController3 {
   @Get()
@@ -90,6 +91,8 @@ export class StreamEmailController3 {
       s3Stream.on('data', (chunk) => {
         if (count++ < 50) {
           res.write(chunk);
+          // Emit progress to the client
+          this.emitProgress(count);
         } else {
           res.end();
         }
@@ -100,10 +103,18 @@ export class StreamEmailController3 {
       });
     } catch (error) {
       console.error('Error streaming file:', error);
-      res.status(500).send({ error: 'Failed to stream file' });
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send({ error: 'Failed to stream file' });
     }
   }
+
+  // Method to emit progress to client
+  emitProgress(count: number): void {
+    // Implement progress emitting logic here
+  }
 }
+
 @Controller('stream-email4')
 export class StreamEmailController4 {
   @Get()
