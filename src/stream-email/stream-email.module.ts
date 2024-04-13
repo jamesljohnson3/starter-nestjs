@@ -2,8 +2,13 @@
 import { Module } from '@nestjs/common';
 import { StreamEmailController } from './stream-email.controller';
 import { StreamEmailController2 } from './stream-email.controller';
+import { StreamEmailController3 } from './stream-email.controller';
 
 @Module({
-  controllers: [StreamEmailController, StreamEmailController2],
+  controllers: [
+    StreamEmailController,
+    StreamEmailController2,
+    StreamEmailController3,
+  ],
 })
 export class StreamEmailModule {}

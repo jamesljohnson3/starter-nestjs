@@ -60,3 +60,47 @@ export class StreamEmailController2 {
     }
   }
 }
+@Controller('stream-email3')
+export class StreamEmailController3 {
+  @Get()
+  async streamEmail(@Res() res: Response): Promise<void> {
+    try {
+      const s3 = new AWS.S3({
+        endpoint: 'https://s3.us-west-004.backblazeb2.com',
+        // Set access key and secret key for authorization
+        credentials: {
+          accessKeyId: '004c793eb828ace0000000004',
+          secretAccessKey: 'K004H1NvDQ+d9fD9sy9iBsYzd8f4/r8',
+        },
+      });
+
+      const s3Params = {
+        Bucket: 'ok767777', // Update with your S3 bucket name
+        Key: 'Sent.mbox', // Update with your S3 file key
+      };
+
+      const s3Stream = s3.getObject(s3Params).createReadStream();
+
+      res.setHeader(
+        'Content-Disposition',
+        'attachment; filename="All_mail_Including_Spam_and_Trash.mbox"',
+      );
+
+      let count = 0;
+      s3Stream.on('data', (chunk) => {
+        if (count++ < 50) {
+          res.write(chunk);
+        } else {
+          res.end();
+        }
+      });
+
+      s3Stream.on('end', () => {
+        res.end();
+      });
+    } catch (error) {
+      console.error('Error streaming file:', error);
+      res.status(500).send({ error: 'Failed to stream file' });
+    }
+  }
+}
