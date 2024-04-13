@@ -104,7 +104,6 @@ export class StreamEmailController3 {
     }
   }
 }
-
 @Controller('stream-email4')
 export class StreamEmailController4 {
   @Get()
@@ -113,18 +112,17 @@ export class StreamEmailController4 {
     @Res() res: Response,
   ) {
     try {
-      const fileUrl =
-        'https://ok767777.s3.us-west-004.backblazeb2.com/All+mail+Including+Spam+and+Trash.mbox';
-      const response = await axios.get(fileUrl, { responseType: 'stream' });
+      const response = await axios.get(
+        `https://new-ambur-unlimitpotential.koyeb.app/stream-email3?chunkIndex=${chunkIndex}`,
+        { responseType: 'stream' },
+      );
 
       res.setHeader('Content-Type', 'text/plain');
 
-      // Stream file in chunks of 5KB
       let totalBytesRead = 0;
       response.data.on('data', (chunk: Buffer) => {
         totalBytesRead += chunk.length;
         if (totalBytesRead > 5000) {
-          // If total bytes read exceeds 5KB, end the response
           res.end();
         } else {
           res.write(chunk);
