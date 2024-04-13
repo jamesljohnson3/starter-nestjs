@@ -18,7 +18,7 @@ export class StreamEmailController {
 
     const s3Params = {
       Bucket: 'ok767777', // Update with your S3 bucket name
-      Key: 'All mail Including Spam and Trash.mbox', // Update with your S3 file key
+      Key: 'Sent.mbox', // Update with your S3 file key
     };
 
     const s3Stream = s3.getObject(s3Params).createReadStream();
