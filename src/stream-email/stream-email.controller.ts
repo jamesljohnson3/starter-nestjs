@@ -1,5 +1,5 @@
 // stream-email.controller.ts
-import { Controller, Get, Res } from '@nestjs/common';
+import { Controller, Get, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
 import * as AWS from 'aws-sdk';
 import axios from 'axios';
@@ -32,11 +32,13 @@ export class StreamEmailController {
     s3Stream.pipe(res);
   }
 }
-
 @Controller('stream-email2')
 export class StreamEmailController2 {
   @Get()
-  async getEmailStream(@Res() res) {
+  async getEmailStream(
+    @Query('chunkIndex') chunkIndex: number,
+    @Res() res: Response,
+  ) {
     try {
       const fileUrl =
         'https://ok767777.s3.us-west-004.backblazeb2.com/All+mail+Including+Spam+and+Trash.mbox';
@@ -45,7 +47,7 @@ export class StreamEmailController2 {
       res.setHeader('Content-Type', 'text/plain');
 
       // Stream file in chunks of 1MB
-      response.data.on('data', (chunk) => {
+      response.data.on('data', (chunk: Buffer) => {
         res.write(chunk);
       });
 
