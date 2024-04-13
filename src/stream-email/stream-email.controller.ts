@@ -3,7 +3,7 @@ import { Controller, Get, Res } from '@nestjs/common';
 import axios from 'axios';
 
 @Controller('stream-email')
-export class EmailStreamController {
+export class StreamEmailController {
   @Get()
   async getEmailStream(@Res() res) {
     try {
