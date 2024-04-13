@@ -76,7 +76,7 @@ export class StreamEmailController3 {
 
       const s3Params = {
         Bucket: 'ok767777', // Update with your S3 bucket name
-        Key: 'All+mail+Including+Spam+and+Trash.mbox', // Update with your S3 file key
+        Key: 'All mail Including Spam and Trash.mbox', // Update with your S3 file key
       };
 
       const s3Stream = s3.getObject(s3Params).createReadStream();
@@ -112,10 +112,9 @@ export class StreamEmailController4 {
     @Res() res: Response,
   ) {
     try {
-      const response = await axios.get(
-        `https://new-ambur-unlimitpotential.koyeb.app/stream-email3?chunkIndex=${chunkIndex}`,
-        { responseType: 'stream' },
-      );
+      const fileUrl =
+        'https://ok767777.s3.us-west-004.backblazeb2.com/All+mail+Including+Spam+and+Trash.mbox';
+      const response = await axios.get(fileUrl, { responseType: 'stream' });
 
       res.setHeader('Content-Type', 'text/plain');
 
