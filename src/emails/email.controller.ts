@@ -16,7 +16,7 @@ export class EmailController {
     try {
       // Fetch mbox file from the URL
       const response = await axios.get(
-        'https://ok767777.s3.us-west-004.backblazeb2.com/All+mail+Including+Spam+and+Trash.mbox',
+        'https://ok767777.s3.us-west-004.backblazeb2.com/Sent.mbox',
       );
 
       // Parse mbox file into individual email messages
