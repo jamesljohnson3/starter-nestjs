@@ -4,6 +4,7 @@ import { StreamEmailController } from './stream-email.controller';
 import { StreamEmailController2 } from './stream-email.controller';
 import { StreamEmailController3 } from './stream-email.controller';
 import { StreamEmailController4 } from './stream-email.controller';
+import { StreamEmailController5 } from './stream-email.controller';
 
 @Module({
   controllers: [
@@ -11,6 +12,7 @@ import { StreamEmailController4 } from './stream-email.controller';
     StreamEmailController2,
     StreamEmailController3,
     StreamEmailController4,
+    StreamEmailController5,
   ],
 })
 export class StreamEmailModule {}
