@@ -115,6 +115,7 @@ export class StreamEmailController3 {
   }
 }
 
+// Not workking?
 @Controller('stream-email4')
 export class StreamEmailController4 {
   @Get()
@@ -178,6 +179,48 @@ export class StreamEmailController5 {
       response.data.on('end', () => {
         res.end();
       });
+    } catch (error) {
+      console.error('Error streaming file:', error);
+      res.status(500).send({ error: 'Failed to stream file' });
+    }
+  }
+}
+
+@Controller('stream-email6')
+export class StreamEmailController6 {
+  @Get()
+  async streamEmail(
+    @Query('chunkIndex') chunkIndex: number,
+    @Res() res: Response,
+  ): Promise<void> {
+    try {
+      const chunkSize = 50; // Number of emails to fetch per request
+      const start = (chunkIndex - 1) * chunkSize; // Calculate start index based on chunkIndex
+      const end = start + chunkSize - 1; // Calculate end index
+
+      const s3 = new AWS.S3({
+        endpoint: 'https://s3.us-west-004.backblazeb2.com',
+        // Set access key and secret key for authorization
+        credentials: {
+          accessKeyId: '004c793eb828ace0000000004',
+          secretAccessKey: 'K004H1NvDQ+d9fD9sy9iBsYzd8f4/r8',
+        },
+      });
+
+      const s3Params = {
+        Bucket: 'ok767777', // Update with your S3 bucket name
+        Key: 'All mail Including Spam and Trash.mbox', // Update with your S3 file key
+        Range: `bytes=${start}-${end}`, // Specify range for fetching data
+      };
+
+      const s3Stream = s3.getObject(s3Params).createReadStream();
+
+      res.setHeader(
+        'Content-Disposition',
+        'attachment; filename="All_mail_Including_Spam_and_Trash.mbox"',
+      );
+
+      s3Stream.pipe(res);
     } catch (error) {
       console.error('Error streaming file:', error);
       res.status(500).send({ error: 'Failed to stream file' });
