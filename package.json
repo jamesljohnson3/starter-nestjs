@@ -46,6 +46,7 @@
     "node-fetch": "^3.3.2",
     "otp-generator": "^4.0.1",
     "pgml": "^0.10.1",
+    "postal-mime": "^2.2.5",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.5.5",
     "socket.io": "^4.7.5",
