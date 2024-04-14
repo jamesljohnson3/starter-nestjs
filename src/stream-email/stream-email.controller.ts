@@ -3,6 +3,7 @@ import { Controller, Get, HttpStatus, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
 import * as AWS from 'aws-sdk';
 import axios from 'axios';
+import * as MailParser from 'mailparser';
 
 @Controller('stream-email')
 export class StreamEmailController {
@@ -150,7 +151,7 @@ export class StreamEmailController4 {
 }
 
 @Controller('stream-email5')
-export class StreamEmailController5 {
+export class StreamEmailController6 {
   @Get()
   async getEmailStream(
     @Query('chunkIndex') chunkIndex: number,
@@ -176,6 +177,48 @@ export class StreamEmailController5 {
       });
 
       response.data.on('end', () => {
+        res.end();
+      });
+    } catch (error) {
+      console.error('Error streaming file:', error);
+      res.status(500).send({ error: 'Failed to stream file' });
+    }
+  }
+}
+
+@Controller('stream-email6')
+export class StreamEmailController5 {
+  @Get()
+  async streamEmail(@Res() res: Response): Promise<void> {
+    try {
+      const s3 = new AWS.S3({
+        endpoint: 'https://s3.us-west-004.backblazeb2.com',
+        credentials: {
+          accessKeyId: '004c793eb828ace0000000004',
+          secretAccessKey: 'K004H1NvDQ+d9fD9sy9iBsYzd8f4/r8',
+        },
+      });
+
+      const s3Params = {
+        Bucket: 'ok767777',
+        Key: 'All mail Including Spam and Trash.mbox',
+      };
+
+      const s3Stream = s3.getObject(s3Params).createReadStream();
+
+      res.setHeader(
+        'Content-Disposition',
+        'attachment; filename="All_mail_Including_Spam_and_Trash.mbox"',
+      );
+
+      const mailParser = new MailParser();
+      s3Stream.pipe(mailParser);
+
+      mailParser.on('data', (email) => {
+        res.write(JSON.stringify(email) + '\n'); // Serialize the parsed email object
+      });
+
+      mailParser.on('end', () => {
         res.end();
       });
     } catch (error) {
