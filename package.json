@@ -17,10 +17,6 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json"
   },
-  "exports": {
-    ".": "./src/postal-mime.js"
-  },
-  
   "dependencies": {
     "@apollo/server": "^4.10.2",
     "@aws-sdk/client-s3": "^3.450.0",
@@ -46,11 +42,9 @@
     "fast-csv": "^5.0.1",
     "graphql": "^16.8.1",
     "html-pdf": "^3.0.1",
-    "mailparser": "^3.7.0",
     "node-fetch": "^3.3.2",
     "otp-generator": "^4.0.1",
     "pgml": "^0.10.1",
-    "postal-mime": "^2.2.5",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.5.5",
     "socket.io": "^4.7.5",
