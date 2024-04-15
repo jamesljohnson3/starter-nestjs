@@ -77,7 +77,7 @@ export class StreamEmailController3 {
 
       const s3Params = {
         Bucket: 'ok767777', // Update with your S3 bucket name
-        Key: 'All+mail+Including+Spam+and+Trash.mbox', // Update with your S3 file key
+        Key: 'All mail Including Spam and Trash.mbox', // Update with your S3 file key
       };
 
       const s3Stream = s3.getObject(s3Params).createReadStream();
@@ -209,7 +209,7 @@ export class StreamEmailController6 {
 
       const s3Params = {
         Bucket: 'ok767777', // Update with your S3 bucket name
-        Key: 'All+mail+Including+Spam+and+Trash.mbox', // Update with your S3 file key
+        Key: 'All mail Including Spam and Trash.mbox', // Update with your S3 file key
         Range: `bytes=${start}-${end}`, // Specify range for fetching data
       };
 
