@@ -159,7 +159,7 @@ export class StreamEmailController5 {
   ) {
     try {
       const fileUrl =
-        'https://ok767777.s3.us-west-004.backblazeb2.com/All+mail+Including+Spam+and+Trash.mbox';
+        'https://ok767777.s3.us-west-004.backblazeb2.com/jamesljohnson3@yahoo.com.mbox';
       const response = await axios.get(fileUrl, { responseType: 'stream' });
 
       res.setHeader('Content-Type', 'text/plain');
