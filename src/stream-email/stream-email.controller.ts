@@ -3,6 +3,7 @@ import { Controller, Get, HttpStatus, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
 import * as AWS from 'aws-sdk';
 import axios from 'axios';
+import * as MailParser from 'mailparser';
 
 @Controller('stream-email')
 export class StreamEmailController {
@@ -220,7 +221,17 @@ export class StreamEmailController6 {
         'attachment; filename="All_mail_Including_Spam_and_Trash.mbox"',
       );
 
-      s3Stream.pipe(res);
+      // Use mailparser to decode mbox data
+      const mailparser = new MailParser();
+
+      // Pipe S3 stream into mailparser
+      s3Stream.pipe(mailparser);
+
+      // Wait for mailparser to finish parsing
+      mailparser.on('end', () => {
+        // Send parsed email data as response
+        res.send(mailparser);
+      });
     } catch (error) {
       console.error('Error streaming file:', error);
       res.status(500).send({ error: 'Failed to stream file' });
