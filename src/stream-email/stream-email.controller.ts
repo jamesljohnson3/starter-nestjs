@@ -3,7 +3,6 @@ import { Controller, Get, HttpStatus, Query, Res } from '@nestjs/common';
 import { Response } from 'express';
 import * as AWS from 'aws-sdk';
 import axios from 'axios';
-import * as simpleParser from 'mailparser';
 
 @Controller('stream-email')
 export class StreamEmailController {
@@ -187,7 +186,7 @@ export class StreamEmailController5 {
   }
 }
 
-Controller('stream-email6');
+@Controller('stream-email6')
 export class StreamEmailController6 {
   @Get()
   async streamEmail(
@@ -221,17 +220,7 @@ export class StreamEmailController6 {
         'attachment; filename="All_mail_Including_Spam_and_Trash.mbox"',
       );
 
-      // Use simpleParser to parse mbox data
-      const mailParser = new simpleParser();
-
-      // Pipe S3 stream into simpleParser
-      s3Stream.pipe(mailParser);
-
-      // Wait for simpleParser to finish parsing
-      mailParser.on('end', (parsedData) => {
-        // Send parsed email data as response
-        res.send(parsedData);
-      });
+      s3Stream.pipe(res);
     } catch (error) {
       console.error('Error streaming file:', error);
       res.status(500).send({ error: 'Failed to stream file' });
