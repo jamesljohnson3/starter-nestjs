@@ -194,7 +194,7 @@ export class StreamEmailController6 {
     @Res() res: Response,
   ): Promise<void> {
     try {
-      const chunkSize = 4000; // Number of emails to fetch per request
+      const chunkSize = 20000; // Number of emails to fetch per request
       const start = (chunkIndex - 1) * chunkSize; // Calculate start index based on chunkIndex
       const end = start + chunkSize - 1; // Calculate end index
 
@@ -213,14 +213,57 @@ export class StreamEmailController6 {
         Range: `bytes=${start}-${end}`, // Specify range for fetching data
       };
 
-      const s3Stream = s3.getObject(s3Params).createReadStream();
+      const s3Object = await s3.getObject(s3Params).promise();
 
-      res.setHeader(
-        'Content-Disposition',
-        'attachment; filename="All_mail_Including_Spam_and_Trash.mbox"',
-      );
+      if (!s3Object.Body) {
+        throw new Error('Empty response from S3');
+      }
 
-      s3Stream.pipe(res);
+      const mboxData: Buffer = s3Object.Body as Buffer;
+
+      // Convert mbox data to string
+      const mboxText = mboxData.toString('utf-8');
+
+      // Split mbox data into individual emails
+      const emails = mboxText.split(/^From\s/m);
+
+      // Process each email
+      for (const email of emails) {
+        // Skip empty email
+        if (!email.trim()) continue;
+
+        // Separate email headers and content
+        const [header, content] = email.split(/\r?\n\r?\n/);
+        const headers = header.split(/\r?\n/);
+
+        // Extract email metadata
+        const emailMetadata: any = {};
+        for (const headerLine of headers) {
+          const [key, value] = headerLine.split(/:\s/);
+          emailMetadata[key.toLowerCase()] = value;
+        }
+
+        // Extract attachments (if any)
+        const attachments: any[] = [];
+        if (content) {
+          // Assuming attachments are encoded as base64
+          const attachmentRegex =
+            /\r?\nContent-Type:.*?;.*?name="(.*?)".*?\r?\nContent-Transfer-Encoding:.*?base64\r?\n\r?\n([\s\S]*?)(?=\r?\nFrom\s|$)/g;
+          let match;
+          while ((match = attachmentRegex.exec(content)) !== null) {
+            const filename = match[1];
+            const data = Buffer.from(match[2], 'base64');
+            attachments.push({ filename, data });
+          }
+        }
+
+        // Process the email and attachments as needed
+        console.log('Email metadata:', emailMetadata);
+        console.log('Attachments:', attachments);
+      }
+
+      // Send response
+      res.status(200).send('Emails processed successfully.');
     } catch (error) {
       console.error('Error streaming file:', error);
       res.status(500).send({ error: 'Failed to stream file' });
