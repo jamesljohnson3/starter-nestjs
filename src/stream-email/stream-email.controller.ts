@@ -235,7 +235,7 @@ export class StreamEmailController7 {
     @Res() res: Response,
   ): Promise<void> {
     try {
-      const chunkSize = 20000; // Number of emails to fetch per request
+      const chunkSize = 40000; // Number of emails to fetch per request
       const start = (chunkIndex - 1) * chunkSize; // Calculate start index based on chunkIndex
       const end = start + chunkSize - 1; // Calculate end index
 
