@@ -89,7 +89,7 @@ export class StreamEmailController3 {
 
       let count = 0;
       s3Stream.on('data', (chunk) => {
-        if (count++ < 5000) {
+        if (count++ < 500) {
           res.write(chunk);
           // Emit progress to the client
           this.emitProgress(count);
