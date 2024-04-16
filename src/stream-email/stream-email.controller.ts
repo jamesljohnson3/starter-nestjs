@@ -299,8 +299,6 @@ export class StreamEmailController7 {
         }
 
         // Process the email and attachments as needed
-        console.log('Email metadata:', emailMetadata);
-        console.log('Attachments:', attachments);
       }
 
       // Send response
