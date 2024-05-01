@@ -1,19 +1,16 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
-  Param,
-  Delete,
   Res,
+  Param,
+  Headers,
   HttpStatus,
   Header,
 } from '@nestjs/common';
-import { VideoService } from './video.service';
+import { VideoData, VideoService } from './video.service';
 import { statSync, createReadStream } from 'fs';
-import { Headers } from '@nestjs/common';
 import { Response } from 'express';
+
 @Controller('video')
 export class VideoController {
   constructor(private readonly videoService: VideoService) {}
@@ -45,22 +42,27 @@ export class VideoController {
       };
       res.writeHead(HttpStatus.PARTIAL_CONTENT, head); //206
       readStreamfile.pipe(res);
-    } else {
-      const head = {
-        'Content-Length': size,
-      };
-      res.writeHead(HttpStatus.OK, head); //200
-      createReadStream(videoPath).pipe(res);
+      return; // End the response if streaming local file
+    }
+
+    const video = this.videoService.findOne(+id);
+    if (typeof video === 'string') {
+      return res.status(HttpStatus.NOT_FOUND).send({ error: video });
+    }
+    const videoURL = (video as VideoData).url; // Type assertion to VideoData
+    if (videoURL) {
+      // Redirect to the provided URL if available
+      return res.redirect(HttpStatus.FOUND, videoURL);
     }
   }
 
   @Get()
-  findAll() {
+  findAll(): VideoData[] {
     return this.videoService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id') id: string): VideoData | string {
     return this.videoService.findOne(+id);
   }
 }
