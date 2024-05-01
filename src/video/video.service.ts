@@ -15,13 +15,13 @@ const allVideos: VideoData[] = [
     name: 'tom-and-jerry',
     duration: '3 mins',
     title: 'Tom & Jerry',
-    url: 'https://f004.backblazeb2.com/file/ok767777/whole+lotta+final.mp4', // Example URL
   },
   {
     id: 2,
     name: 'soul',
     duration: '4 mins',
     title: 'Soul',
+    url: 'https://f004.backblazeb2.com/file/ok767777/whole+lotta+final.mp4', // Example URL
   },
   {
     id: 3,
