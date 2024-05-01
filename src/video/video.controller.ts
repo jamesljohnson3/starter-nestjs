@@ -26,15 +26,6 @@ export class VideoController {
     @Headers() headers,
     @Res() res: Response,
   ) {
-    const video = this.videoService.findOne(+id);
-    if (typeof video === 'string') {
-      return res.status(HttpStatus.NOT_FOUND).send({ error: video });
-    }
-    const videoURL = (video as VideoData).url; // Type assertion to VideoData
-    if (videoURL) {
-      // Redirect to the provided URL if available
-      return res.redirect(HttpStatus.FOUND, videoURL);
-    }
     const videoPath = `assets/${id}.mp4`;
     const { size } = statSync(videoPath);
     const videoRange = headers.range;
@@ -60,6 +51,15 @@ export class VideoController {
       };
       res.writeHead(HttpStatus.OK, head); //200
       createReadStream(videoPath).pipe(res);
+    }
+    const video = this.videoService.findOne(+id);
+    if (typeof video === 'string') {
+      return res.status(HttpStatus.NOT_FOUND).send({ error: video });
+    }
+    const videoURL = (video as VideoData).url; // Type assertion to VideoData
+    if (videoURL) {
+      // Redirect to the provided URL if available
+      return res.redirect(HttpStatus.FOUND, videoURL);
     }
   }
 
