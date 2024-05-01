@@ -10,7 +10,7 @@ import {
   HttpStatus,
   Header,
 } from '@nestjs/common';
-import { VideoData, VideoService } from './video.service';
+import { VideoService } from './video.service';
 import { statSync, createReadStream } from 'fs';
 import { Headers } from '@nestjs/common';
 import { Response } from 'express';
@@ -52,24 +52,15 @@ export class VideoController {
       res.writeHead(HttpStatus.OK, head); //200
       createReadStream(videoPath).pipe(res);
     }
-    const video = this.videoService.findOne(+id);
-    if (typeof video === 'string') {
-      return res.status(HttpStatus.NOT_FOUND).send({ error: video });
-    }
-    const videoURL = (video as VideoData).url; // Type assertion to VideoData
-    if (videoURL) {
-      // Redirect to the provided URL if available
-      return res.redirect(HttpStatus.FOUND, videoURL);
-    }
   }
 
   @Get()
-  findAll(): VideoData[] {
+  findAll() {
     return this.videoService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): VideoData | string {
+  findOne(@Param('id') id: string) {
     return this.videoService.findOne(+id);
   }
 }
