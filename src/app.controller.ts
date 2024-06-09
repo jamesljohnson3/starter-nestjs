@@ -193,7 +193,7 @@ export class AppController {
       if (file.mimetype === 'image/heic' || file.mimetype === 'image/heif') {
         const inputBuffer = fs.readFileSync(file.path);
         const outputBuffer = await convert({
-          buffer: inputBuffer,
+          buffer: new Uint8Array(inputBuffer),
           format: 'JPEG',
           quality: 1,
         });
@@ -207,7 +207,7 @@ export class AppController {
           'uploads',
           outputFileName,
         );
-        fs.writeFileSync(outputPath, outputBuffer);
+        fs.writeFileSync(outputPath, Buffer.from(outputBuffer));
 
         return {
           message: 'File converted successfully',
