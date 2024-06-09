@@ -21,7 +21,7 @@ import { AppService } from './app.service';
 import { EventsService } from './events.service';
 import * as fastcsv from 'fast-csv';
 import { DataService } from './data/data.service';
-import { execute, buildInputFile } from 'wasm-imagemagick';
+import * as sharp from 'sharp';
 
 interface ApiResponse {
   message: string;
@@ -188,35 +188,22 @@ export class AppController {
 
   @Post('convert-heic')
   @UseInterceptors(FileInterceptor('file'))
-  async uploadFile(@UploadedFile() file) {
+  async convertHeicToJpeg(@UploadedFile() file, @Res() res) {
     try {
       // Check if file is HEIC/HEIF
       if (file.mimetype === 'image/heic' || file.mimetype === 'image/heif') {
-        // Convert HEIC/HEIF to JPEG using ImageMagick
-        const inputFile = await buildInputFile('input.heic', file.buffer);
-        const { outputFiles, exitCode, stderr } = await execute({
-          inputFiles: [inputFile],
-          commands: ['convert', 'input.heic', 'output.jpg'], // Convert HEIC to JPEG
-        });
-
-        if (exitCode === 0 && outputFiles.length > 0) {
-          const outputFileName = 'output.jpg'; // Change this to your desired output file name
-          return {
-            message: 'File converted successfully',
-            fileName: outputFileName,
-          };
-        } else {
-          throw new Error(`Conversion failed: ${stderr.join('\n')}`);
-        }
+        // Convert HEIC/HEIF to JPEG using sharp
+        const jpegBuffer = await sharp(file.buffer).jpeg().toBuffer();
+        // Send the converted JPEG buffer as response
+        res.set('Content-Type', 'image/jpeg');
+        res.send(jpegBuffer);
       } else {
-        return {
-          message: 'File is not in HEIC/HEIF format',
-          fileName: file.originalname,
-        };
+        // If file is not in HEIC/HEIF format, return error response
+        res.status(400).json({ message: 'File is not in HEIC/HEIF format' });
       }
     } catch (error) {
       console.error('Error converting HEIC file:', error);
-      throw new Error('Error converting HEIC file');
+      res.status(500).json({ message: 'Error converting HEIC file' });
     }
   }
   @Get('csv')
