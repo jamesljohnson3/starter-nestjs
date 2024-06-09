@@ -190,23 +190,23 @@ export class AppController {
   @UseInterceptors(FileInterceptor('file'))
   async convertHeicToJpeg(@UploadedFile() file: Express.Multer.File) {
     try {
-      // Check if file is present
-      if (!file) {
-        throw new Error('No file uploaded');
-      }
-
       // Check if file is HEIC/HEIF
       if (file.mimetype === 'image/heic' || file.mimetype === 'image/heif') {
-        // Convert HEIC/HEIF to JPEG using heic-convert
-        const jpegBuffer = await convert({
-          buffer: file.buffer,
+        const inputBuffer = fs.readFileSync(file.path);
+        const outputBuffer = await convert({
+          buffer: new Uint8Array(inputBuffer),
           format: 'JPEG',
+          quality: 1,
         });
 
-        const dataUrl = `data:image/jpeg;base64,${jpegBuffer.toString()}`;
+        // Convert the output buffer to a Base64 data URL
+        const base64Data = Buffer.from(outputBuffer).toString('base64');
+        const dataUrl = `data:image/jpeg;base64,${base64Data}`;
+
+        // Return the data URL
         return {
           message: 'File converted successfully',
-          imageData: dataUrl,
+          imageUrl: dataUrl,
         };
       } else {
         return {
@@ -219,6 +219,7 @@ export class AppController {
       throw new Error('Error converting HEIC file');
     }
   }
+
   @Get('csv')
   generateCsv() {
     const filePath = './data.csv';
