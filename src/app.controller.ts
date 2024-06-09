@@ -186,29 +186,30 @@ export class AppController {
     }
   }
 
-  @Post('convert-heic-to-jpeg')
+   @Post('convert-heic-to-jpeg')
   @UseInterceptors(FileInterceptor('file'))
-  async convertHeicToJpeg(@UploadedFile() file) {
+  async convertHeicToJpeg(@UploadedFile() file: Express.Multer.File) {
     try {
-      if (!file) {
-        throw new Error('No file uploaded');
-      }
-
       // Check if file is HEIC/HEIF
       if (file.mimetype === 'image/heic' || file.mimetype === 'image/heif') {
-        // Convert HEIC/HEIF to JPEG
-        const jpegBuffer = await sharp(file.buffer).jpeg().toBuffer();
-
-        // Return the converted JPEG buffer
-        return jpegBuffer;
+        // Convert HEIC/HEIF to JPEG using Sharp
+        const buffer = await Sharp(file.buffer).jpeg().toBuffer();
+        return {
+          message: 'File converted successfully',
+          jpegBuffer: buffer,
+        };
       } else {
-        throw new Error('File is not in HEIC/HEIF format');
+        return {
+          message: 'File is not in HEIC/HEIF format',
+          fileName: file.originalname,
+        };
       }
     } catch (error) {
       console.error('Error converting HEIC file:', error);
       throw new Error('Error converting HEIC file');
     }
   }
+}
   @Get('csv')
   generateCsv() {
     const filePath = './data.csv';
