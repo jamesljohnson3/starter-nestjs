@@ -21,8 +21,7 @@ import { AppService } from './app.service';
 import { EventsService } from './events.service';
 import * as fastcsv from 'fast-csv';
 import { DataService } from './data/data.service';
-import { diskStorage } from 'multer';
-import { heic2any } from 'heic-convert';
+import { spawn } from 'child_process';
 
 interface ApiResponse {
   message: string;
@@ -195,16 +194,21 @@ export class AppController {
 
       // Check if file is HEIC/HEIF
       if (file.mimetype === 'image/heic' || file.mimetype === 'image/heif') {
-        // Convert HEIC/HEIF to JPEG
-        const { buffer } = await heic2any({
-          buffer: file.buffer,
-          toType: 'jpeg',
+        // Convert HEIC/HEIF to JPEG using ImageMagick
+        const outputFileName = `${file.filename}.jpg`;
+        const command = `convert ${file.path} ${outputFileName}`;
+
+        const convertProcess = spawn('sh', ['-c', command]);
+        convertProcess.on('close', (code) => {
+          if (code === 0) {
+            console.log('File converted successfully');
+            // You can do something with the converted file here
+          } else {
+            console.error('Error converting HEIC file');
+          }
         });
-        console.log('File converted successfully');
-        return { convertedFile: buffer };
       } else {
         console.log('File is not in HEIC/HEIF format');
-        return { originalFile: file };
       }
     } catch (error) {
       console.error('Error converting HEIC file:', error);

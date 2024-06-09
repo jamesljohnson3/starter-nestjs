@@ -43,6 +43,7 @@
     "graphql": "^16.8.1",
     "heic-convert": "^2.1.0",
     "html-pdf": "^3.0.1",
+    "imagemagick": "^0.1.3",
     "mailparser": "^3.7.0",
     "node-fetch": "^3.3.2",
     "otp-generator": "^4.0.1",
