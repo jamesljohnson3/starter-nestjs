@@ -186,10 +186,13 @@ export class AppController {
       res.status(500).send('Error processing uploaded data');
     }
   }
+
   @Post('convert-heic')
   @UseInterceptors(FileInterceptor('file'))
-  async convertHeicFile(@UploadedFile() file) {
+  async uploadFile(@UploadedFile() file) {
     try {
+      console.log('Received file:', file);
+
       // Check if file is HEIC/HEIF
       if (file.mimetype === 'image/heic' || file.mimetype === 'image/heif') {
         // Convert HEIC/HEIF to JPEG
@@ -197,9 +200,12 @@ export class AppController {
           buffer: file.buffer,
           toType: 'jpeg',
         });
+        console.log('File converted successfully');
         return { convertedFile: buffer };
+      } else {
+        console.log('File is not in HEIC/HEIF format');
+        return { originalFile: file };
       }
-      return { originalFile: file };
     } catch (error) {
       console.error('Error converting HEIC file:', error);
       throw new Error('Error converting HEIC file');
