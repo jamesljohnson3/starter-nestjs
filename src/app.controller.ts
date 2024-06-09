@@ -21,6 +21,8 @@ import { AppService } from './app.service';
 import { EventsService } from './events.service';
 import * as fastcsv from 'fast-csv';
 import { DataService } from './data/data.service';
+import { diskStorage } from 'multer';
+import { heic2any } from 'heic-convert';
 
 interface ApiResponse {
   message: string;
@@ -184,7 +186,25 @@ export class AppController {
       res.status(500).send('Error processing uploaded data');
     }
   }
-
+  @Post('convert-heic')
+  @UseInterceptors(FileInterceptor('file'))
+  async convertHeicFile(@UploadedFile() file) {
+    try {
+      // Check if file is HEIC/HEIF
+      if (file.mimetype === 'image/heic' || file.mimetype === 'image/heif') {
+        // Convert HEIC/HEIF to JPEG
+        const { buffer } = await heic2any({
+          buffer: file.buffer,
+          toType: 'jpeg',
+        });
+        return { convertedFile: buffer };
+      }
+      return { originalFile: file };
+    } catch (error) {
+      console.error('Error converting HEIC file:', error);
+      throw new Error('Error converting HEIC file');
+    }
+  }
   @Get('csv')
   generateCsv() {
     const filePath = './data.csv';
