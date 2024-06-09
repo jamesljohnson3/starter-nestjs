@@ -185,10 +185,16 @@ export class AppController {
       res.status(500).send('Error processing uploaded data');
     }
   }
+
   @Post('convert-heic-to-jpeg')
   @UseInterceptors(FileInterceptor('file'))
   async convertHeicToJpeg(@UploadedFile() file: Express.Multer.File) {
     try {
+      // Check if file is present
+      if (!file) {
+        throw new Error('No file uploaded');
+      }
+
       // Check if file is HEIC/HEIF
       if (file.mimetype === 'image/heic' || file.mimetype === 'image/heif') {
         // Convert HEIC/HEIF to JPEG using heic-convert
@@ -196,6 +202,7 @@ export class AppController {
           buffer: file.buffer,
           format: 'JPEG',
         });
+
         const dataUrl = `data:image/jpeg;base64,${jpegBuffer.toString()}`;
         return {
           message: 'File converted successfully',
