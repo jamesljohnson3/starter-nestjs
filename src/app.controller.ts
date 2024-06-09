@@ -196,9 +196,7 @@ export class AppController {
           buffer: file.buffer,
           format: 'JPEG',
         });
-        const dataUrl = `data:image/jpeg;base64,${jpegBuffer.toString(
-          'base64',
-        )}`;
+        const dataUrl = `data:image/jpeg;base64,${jpegBuffer.toString()}`;
         return {
           message: 'File converted successfully',
           imageData: dataUrl,
