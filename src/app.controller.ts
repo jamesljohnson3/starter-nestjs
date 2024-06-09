@@ -21,8 +21,8 @@ import { AppService } from './app.service';
 import { EventsService } from './events.service';
 import * as fastcsv from 'fast-csv';
 import { DataService } from './data/data.service';
-import * as Sharp from 'sharp';
-
+import * as path from 'path';
+import * as convert from 'heic-convert';
 interface ApiResponse {
   message: string;
   key: string;
@@ -185,18 +185,33 @@ export class AppController {
       res.status(500).send('Error processing uploaded data');
     }
   }
-
   @Post('convert-heic-to-jpeg')
   @UseInterceptors(FileInterceptor('file'))
   async convertHeicToJpeg(@UploadedFile() file: Express.Multer.File) {
     try {
       // Check if file is HEIC/HEIF
       if (file.mimetype === 'image/heic' || file.mimetype === 'image/heif') {
-        // Convert HEIC/HEIF to JPEG using Sharp
-        const buffer = await Sharp(file.buffer).jpeg().toBuffer();
+        const inputBuffer = fs.readFileSync(file.path);
+        const outputBuffer = await convert({
+          buffer: inputBuffer,
+          format: 'JPEG',
+          quality: 1,
+        });
+
+        // Write the converted JPEG buffer to a new file
+        const outputFileName =
+          path.basename(file.path, path.extname(file.path)) + '.jpg';
+        const outputPath = path.join(
+          __dirname,
+          '..',
+          'uploads',
+          outputFileName,
+        );
+        fs.writeFileSync(outputPath, outputBuffer);
+
         return {
           message: 'File converted successfully',
-          jpegBuffer: buffer,
+          fileName: outputFileName,
         };
       } else {
         return {
