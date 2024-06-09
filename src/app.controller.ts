@@ -191,27 +191,17 @@ export class AppController {
     try {
       // Check if file is HEIC/HEIF
       if (file.mimetype === 'image/heic' || file.mimetype === 'image/heif') {
-        const inputBuffer = fs.readFileSync(file.path);
-        const outputBuffer = await convert({
-          buffer: new Uint8Array(inputBuffer),
+        // Convert HEIC/HEIF to JPEG using heic-convert
+        const jpegBuffer = await convert({
+          buffer: file.buffer,
           format: 'JPEG',
-          quality: 1,
         });
-
-        // Write the converted JPEG buffer to a new file
-        const outputFileName =
-          path.basename(file.path, path.extname(file.path)) + '.jpg';
-        const outputPath = path.join(
-          __dirname,
-          '..',
-          'uploads',
-          outputFileName,
-        );
-        fs.writeFileSync(outputPath, Buffer.from(outputBuffer));
-
+        const dataUrl = `data:image/jpeg;base64,${jpegBuffer.toString(
+          'base64',
+        )}`;
         return {
           message: 'File converted successfully',
-          fileName: outputFileName,
+          imageData: dataUrl,
         };
       } else {
         return {
