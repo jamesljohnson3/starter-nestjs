@@ -21,8 +21,7 @@ import { AppService } from './app.service';
 import { EventsService } from './events.service';
 import * as fastcsv from 'fast-csv';
 import { DataService } from './data/data.service';
-import { exec } from 'child_process';
-import { promisify } from 'util';
+import { execute, buildInputFile } from 'wasm-imagemagick';
 
 interface ApiResponse {
   message: string;
@@ -36,7 +35,6 @@ interface PostData {
   field2: string;
   // Add more fields as needed
 }
-const execAsync = promisify(exec);
 
 @Controller()
 export class AppController {
@@ -195,13 +193,21 @@ export class AppController {
       // Check if file is HEIC/HEIF
       if (file.mimetype === 'image/heic' || file.mimetype === 'image/heif') {
         // Convert HEIC/HEIF to JPEG using ImageMagick
-        const outputFileName = file.originalname.replace(/\.[^/.]+$/, '.jpg'); // Change file extension to .jpg
-        const command = `magick convert "${file.path}" "${outputFileName}"`;
-        await execAsync(command);
-        return {
-          message: 'File converted successfully',
-          fileName: outputFileName,
-        };
+        const inputFile = await buildInputFile('input.heic', file.buffer);
+        const { outputFiles, exitCode, stderr } = await execute({
+          inputFiles: [inputFile],
+          commands: ['convert', 'input.heic', 'output.jpg'], // Convert HEIC to JPEG
+        });
+
+        if (exitCode === 0 && outputFiles.length > 0) {
+          const outputFileName = 'output.jpg'; // Change this to your desired output file name
+          return {
+            message: 'File converted successfully',
+            fileName: outputFileName,
+          };
+        } else {
+          throw new Error(`Conversion failed: ${stderr.join('\n')}`);
+        }
       } else {
         return {
           message: 'File is not in HEIC/HEIF format',
