@@ -188,7 +188,7 @@ export class AppController {
 
   @Post('convert-heic-to-jpeg')
   @UseInterceptors(FileInterceptor('file'))
-  async convertHeicToJpeg(@UploadedFile() file) {
+  async convertHeicToJpeg(@UploadedFile() file: Express.Multer.File) {
     try {
       if (!file) {
         throw new Error('No file uploaded');
