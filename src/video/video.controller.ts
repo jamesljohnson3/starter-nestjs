@@ -10,11 +10,34 @@ import {
 import { VideoData, VideoService } from './video.service';
 import { statSync, createReadStream } from 'fs';
 import { Response } from 'express';
+import fetch from 'node-fetch';
+import * as fs from 'fs';
+import { promisify } from 'util';
+
+
+const writeFileAsync = promisify(fs.writeFile);
 
 @Controller('video')
 export class VideoController {
   constructor(private readonly videoService: VideoService) {}
 
+    @Get('stream2')
+    async streamVideo(@Res() res: Response) {
+        try {
+            const videoUrl = 'https://f004.backblazeb2.com/file/ok767777/whole+lotta+final.mp4';
+            const response = await fetch(videoUrl);
+            if (!response.ok) {
+                throw new Error('Failed to fetch video');
+            }
+
+            // Stream video data to response
+            response.body.pipe(res);
+
+        } catch (error) {
+            console.error('Error streaming video:', error);
+            res.status(500).send('Error streaming video');
+        }
+    }
   @Get('stream/:id')
   @Header('Accept-Ranges', 'bytes')
   @Header('Content-Type', 'video/mp4')
