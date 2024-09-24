@@ -29,6 +29,8 @@ import { MboxParserService } from './services/mbox-parser.service';
 import { EmailStreamModule } from './email-stream/email-stream.module';
 import { StreamEmailController } from './stream-email/stream-email.controller';
 import { StreamEmailModule } from './stream-email/stream-email.module';
+import { ApiController } from './api/api.controller';
+import { ApiService } from './api/api.service';
 
 @Module({
   imports: [
@@ -59,6 +61,7 @@ import { StreamEmailModule } from './stream-email/stream-email.module';
     MboxToPdfController,
     EmailController,
     StreamEmailController,
+    ApiController
   ],
   providers: [
     EventsService,
@@ -68,6 +71,7 @@ import { StreamEmailModule } from './stream-email/stream-email.module';
     ChunkUploadService,
     DataService,
     MboxParserService,
+    ApiService
   ],
 })
 export class AppModule {}
