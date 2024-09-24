@@ -10,31 +10,10 @@ import {
 import { VideoData, VideoService } from './video.service';
 import { statSync, createReadStream } from 'fs';
 import { Response } from 'express';
-import fetch from 'node-fetch';
 
 @Controller('video')
 export class VideoController {
   constructor(private readonly videoService: VideoService) {}
-
-  @Get('stream2')
-  async streamVideo(@Res() res: Response) {
-    try {
-      const videoUrl = 'https://f004.backblazeb2.com/file/ok767777/whole+lotta+final.mp4';
-      const response = await fetch(videoUrl);
-      if (!response.ok) {
-        throw new Error('Failed to fetch video');
-      }
-
-      // Set content type for the video
-      res.setHeader('Content-Type', 'video/mp4');
-
-      // Stream video data to response
-      response.body.pipe(res);
-    } catch (error) {
-      console.error('Error streaming video:', error);
-      res.status(500).send('Error streaming video');
-    }
-  }
 
   @Get('stream/:id')
   @Header('Accept-Ranges', 'bytes')
@@ -61,7 +40,7 @@ export class VideoController {
         'Content-Range': `bytes ${start}-${end}/${size}`,
         'Content-Length': chunksize,
       };
-      res.writeHead(HttpStatus.PARTIAL_CONTENT, head); // 206
+      res.writeHead(HttpStatus.PARTIAL_CONTENT, head); //206
       readStreamfile.pipe(res);
       return; // End the response if streaming local file
     }
