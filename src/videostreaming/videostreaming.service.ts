@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { Injectable } from '@nestjs/common';
 import * as ffmpeg from 'fluent-ffmpeg';
 import * as ffmpegStatic from 'ffmpeg-static';
@@ -24,22 +25,19 @@ export class VideoStreamingService {
         return;
       }
 
+      // Create a Readable stream from the ArrayBuffer
       const bufferStream = new Readable();
       bufferStream.push(response.data);
-      bufferStream.push(null);
+      bufferStream.push(null); // End the stream
 
       res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
 
       const hlsStream = ffmpeg(bufferStream)
         .setFfmpegPath(this.ffmpegPath)
-        .inputOptions([
-          '-fflags +genpts',
-          '-analyzeduration 20000000', // Double analyzeduration
-          '-probesize 20000000', // Double probe size
-        ])
         .outputOptions([
+          '-fflags +genpts', // Generate missing PTS if required
+          '-flags +global_header', // Required for streaming output
           '-preset ultrafast',
-          '-pix_fmt yuv420p', // Ensure compatibility
           '-g 50',
           '-sc_threshold 0',
           '-map 0',
@@ -51,27 +49,30 @@ export class VideoStreamingService {
           '-max_muxing_queue_size 4096', // Further increase queue size
           '-c:v libx264',
           '-b:v 1M',
+          '-pix_fmt yuv420p', // Specify pixel format
+          '-analyzeduration 2147483647', // Maximize analysis duration
+          '-probesize 2147483647', // Maximize probe size
         ])
         .output(res)
         .format('hls')
-        .on('start', (commandLine) => {
-          console.log('FFmpeg command:', commandLine);
-        })
         .on('end', () => {
           console.log('HLS streaming finished');
         })
         .on('error', (err, stdout, stderr) => {
-          console.error('FFmpeg Error:', err.message);
-          console.error('FFmpeg Stdout:', stdout);
-          console.error('FFmpeg Stderr:', stderr);
+          console.error('Error occurred while streaming video:', err.message);
+          console.error('ffmpeg stdout:', stdout);
+          console.error('ffmpeg stderr:', stderr);
           if (!res.headersSent) {
             res.status(500).send('Error streaming video');
           }
+        })
+        .on('stderr', (stderrLine) => {
+          console.error('ffmpeg stderr:', stderrLine);
         });
 
       hlsStream.run();
     } catch (error) {
-      console.error('Error fetching video:', error);
+      console.error('Error fetching video: ', error);
       if (!res.headersSent) {
         res.status(500).send('Error fetching video');
       }
