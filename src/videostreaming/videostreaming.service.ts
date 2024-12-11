@@ -3,6 +3,8 @@ import * as ffmpeg from 'fluent-ffmpeg';
 import * as ffmpegStatic from 'ffmpeg-static';
 import * as axios from 'axios';
 import { Response } from 'express';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class VideoStreamingService {
@@ -16,17 +18,22 @@ export class VideoStreamingService {
 
     try {
       // Fetch the MP4 video from the URL
-      const response = await axios.default.get(videoUrl, { responseType: 'stream' });
+      const response = await axios.default.get(videoUrl, { responseType: 'arraybuffer' });  // Change to arraybuffer to ensure the video is fetched properly
 
-      if (!response.data || !response.data.pipe) {
+      if (!response.data) {
         res.status(404).send('Video not found');
         return;
       }
 
+      // Save the video file temporarily to disk (for debugging purposes)
+      const tempFilePath = path.join(__dirname, 'temp_video.mp4');
+      fs.writeFileSync(tempFilePath, response.data);
+
       // Set headers for HLS streaming
       res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
 
-      const hlsStream = ffmpeg(response.data)
+      // Add protocol whitelist option to handle HTTP/HTTPS streaming
+      const hlsStream = ffmpeg(tempFilePath)  // Use local file for testing
         .setFfmpegPath(this.ffmpegPath)
         .outputOptions([
           '-preset fast',
@@ -37,11 +44,14 @@ export class VideoStreamingService {
           '-hls_list_size 0',
           '-hls_allow_cache 1',
           '-hls_flags delete_segments',
-          '-protocol_whitelist file,http,https,tcp,tls'  // Allow streaming over HTTP(S)
+          '-loglevel debug', // Added to get more detailed error logs
         ])
         .output(res)
         .format('hls')
-        .on('end', () => console.log('HLS streaming finished'))
+        .on('end', () => {
+          console.log('HLS streaming finished');
+          fs.unlinkSync(tempFilePath);  // Cleanup temporary file
+        })
         .on('error', (err) => {
           console.error('Error occurred: ', err);
           if (!res.headersSent) {
