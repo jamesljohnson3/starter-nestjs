@@ -3,8 +3,7 @@ import * as ffmpeg from 'fluent-ffmpeg';
 import * as ffmpegStatic from 'ffmpeg-static';
 import * as axios from 'axios';
 import { Response } from 'express';
-import * as fs from 'fs';
-import * as path from 'path';
+import { Readable } from 'stream';
 
 @Injectable()
 export class VideoStreamingService {
@@ -17,7 +16,7 @@ export class VideoStreamingService {
     const videoUrl = `https://f004.backblazeb2.com/file/ok767777/baadad5a-66ef-44df-9cba-8b358c8dfbd5-file.mp4`;  // Replace with actual video URL using `id`
 
     try {
-      // Fetch the MP4 video from the URL as array buffer
+      // Fetch the MP4 video from the URL as an array buffer
       const response = await axios.default.get(videoUrl, { responseType: 'arraybuffer' });
 
       if (!response.data) {
@@ -28,11 +27,13 @@ export class VideoStreamingService {
       // Set the headers for the HLS stream response
       res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
 
-      // Create a readable stream from the array buffer
-      const videoStream = fs.createReadStream(path.join(__dirname, 'temp_video.mp4'));
+      // Use a stream from the response's arraybuffer
+      const bufferStream = new Readable();
+      bufferStream.push(response.data);
+      bufferStream.push(null);  // End the stream
 
       // Streaming video via ffmpeg
-      const hlsStream = ffmpeg(videoStream)
+      const hlsStream = ffmpeg(bufferStream)
         .setFfmpegPath(this.ffmpegPath)
         .outputOptions([
           '-preset fast',
@@ -58,7 +59,7 @@ export class VideoStreamingService {
         });
 
       hlsStream.run();
-
+      
     } catch (error) {
       console.error('Error fetching video: ', error);
       if (!res.headersSent) {
