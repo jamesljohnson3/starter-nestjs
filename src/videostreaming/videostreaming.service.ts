@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import { Injectable } from '@nestjs/common';
 import * as ffmpeg from 'fluent-ffmpeg';
 import * as ffmpegStatic from 'ffmpeg-static';
@@ -24,17 +25,19 @@ export class VideoStreamingService {
         return;
       }
 
-      res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
-
       // Create a Readable stream from the ArrayBuffer
       const bufferStream = new Readable();
       bufferStream.push(response.data);
       bufferStream.push(null); // End the stream
 
+      res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+
       const hlsStream = ffmpeg(bufferStream)
         .setFfmpegPath(this.ffmpegPath)
         .outputOptions([
-          '-preset fast', // Use a more stable preset
+          '-fflags +genpts', // Generate missing PTS if required
+          '-flags +global_header', // Required for streaming output
+          '-preset ultrafast',
           '-g 50',
           '-sc_threshold 0',
           '-map 0',
@@ -43,12 +46,11 @@ export class VideoStreamingService {
           '-hls_allow_cache 1',
           '-hls_flags delete_segments',
           '-loglevel debug',
-          '-max_muxing_queue_size 1024',
+          '-max_muxing_queue_size 2048', // Increase buffer size
           '-c:v libx264',
           '-b:v 1M',
-          '-pix_fmt yuv420p', // Specify pixel format
-          '-analyzeduration 10000000', // Increase analyzeduration
-          '-probesize 10000000', // Increase probesize
+          '-analyzeduration 10000000', // Further increase duration for analysis
+          '-probesize 10000000', // Further increase probe size
         ])
         .output(res)
         .format('hls')
@@ -65,7 +67,6 @@ export class VideoStreamingService {
         });
 
       hlsStream.run();
-      
     } catch (error) {
       console.error('Error fetching video: ', error);
       if (!res.headersSent) {
@@ -74,4 +75,3 @@ export class VideoStreamingService {
     }
   }
 }
-
