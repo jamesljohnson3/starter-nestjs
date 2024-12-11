@@ -26,6 +26,11 @@ export class VideoStreamingService {
 
       const hlsStream = ffmpeg(response.data)
         .setFfmpegPath(this.ffmpegPath)
+        .inputFormat('mp4')
+        .inputOptions([
+          '-analyzeduration 100M',
+          '-probesize 100M'
+        ])
         .outputOptions([
           '-preset ultrafast',
           '-g 50',
@@ -38,10 +43,17 @@ export class VideoStreamingService {
           '-loglevel debug',
           '-max_muxing_queue_size 1024',
           '-c:v libx264',
-          '-b:v 1M'
+          '-b:v 1M',
+          '-pix_fmt yuv420p'
         ])
         .output(res)
         .format('hls')
+        .on('start', (commandLine) => {
+          console.log('FFmpeg process started:', commandLine);
+        })
+        .on('progress', (progress) => {
+          console.log('Processing: ' + progress.percent + '% done');
+        })
         .on('end', () => {
           console.log('HLS streaming finished');
         })
