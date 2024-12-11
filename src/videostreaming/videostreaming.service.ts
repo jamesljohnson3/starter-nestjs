@@ -4,7 +4,6 @@ import * as ffmpeg from 'fluent-ffmpeg';
 import * as ffmpegStatic from 'ffmpeg-static';
 import * as axios from 'axios';
 import { Response } from 'express';
-import { Readable } from 'stream';
 
 @Injectable()
 export class VideoStreamingService {
@@ -17,7 +16,7 @@ export class VideoStreamingService {
 
     try {
       const response = await axios.default.get(videoUrl, {
-        responseType: 'arraybuffer',
+        responseType: 'stream',
       });
 
       if (!response.data) {
@@ -25,36 +24,57 @@ export class VideoStreamingService {
         return;
       }
 
-      // Create a Readable stream from the ArrayBuffer
-      const bufferStream = new Readable();
-      bufferStream.push(response.data);
-      bufferStream.push(null); // End the stream
-
       res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
 
-      const hlsStream = ffmpeg(bufferStream)
+      const hlsStream = ffmpeg(response.data)
         .setFfmpegPath(this.ffmpegPath)
+        .inputFormat('mp4')
+        .inputOptions([
+          '-analyzeduration',
+          '10000000',
+          '-probesize',
+          '10000000',
+        ])
         .outputOptions([
-          '-fflags +genpts', // Generate missing PTS if required
-          '-flags +global_header', // Required for streaming output
-          '-preset ultrafast',
-          '-g 50',
-          '-sc_threshold 0',
-          '-map 0',
-          '-hls_time 10',
-          '-hls_list_size 0',
-          '-hls_allow_cache 1',
-          '-hls_flags delete_segments',
-          '-loglevel debug',
-          '-max_muxing_queue_size 4096', // Further increase queue size
-          '-c:v libx264',
-          '-b:v 1M',
-          '-pix_fmt yuv420p', // Specify pixel format
-          '-analyzeduration 2147483647', // Maximize analysis duration
-          '-probesize 2147483647', // Maximize probe size
+          '-fflags',
+          '+genpts',
+          '-flags',
+          '+global_header',
+          '-preset',
+          'ultrafast',
+          '-g',
+          '50',
+          '-sc_threshold',
+          '0',
+          '-map',
+          '0',
+          '-hls_time',
+          '10',
+          '-hls_list_size',
+          '0',
+          '-hls_allow_cache',
+          '1',
+          '-hls_flags',
+          'delete_segments',
+          '-loglevel',
+          'debug',
+          '-max_muxing_queue_size',
+          '2048',
+          '-c:v',
+          'libx264',
+          '-b:v',
+          '1M',
+          '-pix_fmt',
+          'yuv420p',
         ])
         .output(res)
         .format('hls')
+        .on('start', (commandLine) => {
+          console.log('FFmpeg process started:', commandLine);
+        })
+        .on('progress', (progress) => {
+          console.log('Processing: ' + progress.percent + '% done');
+        })
         .on('end', () => {
           console.log('HLS streaming finished');
         })
@@ -65,9 +85,6 @@ export class VideoStreamingService {
           if (!res.headersSent) {
             res.status(500).send('Error streaming video');
           }
-        })
-        .on('stderr', (stderrLine) => {
-          console.error('ffmpeg stderr:', stderrLine);
         });
 
       hlsStream.run();
