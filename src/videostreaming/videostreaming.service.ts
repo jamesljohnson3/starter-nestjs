@@ -17,7 +17,7 @@ export class VideoStreamingService {
 
     try {
       const response = await axios.default.get(videoUrl, {
-        responseType: 'arraybuffer',
+        responseType: 'stream',
       });
 
       if (!response.data) {
@@ -25,35 +25,54 @@ export class VideoStreamingService {
         return;
       }
 
-      // Create a Readable stream from the ArrayBuffer
-      const bufferStream = new Readable();
-      bufferStream.push(response.data);
-      bufferStream.push(null); // End the stream
-
       res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
 
-      const hlsStream = ffmpeg(bufferStream)
+      const hlsStream = ffmpeg(response.data)
         .setFfmpegPath(this.ffmpegPath)
+        .inputFormat('mp4')
+        .inputOptions([
+          '-analyzeduration',
+          '10000000',
+          '-probesize',
+          '10000000',
+        ])
         .outputOptions([
-          '-fflags +genpts', // Generate missing PTS if required
-          '-flags +global_header', // Required for streaming output
-          '-preset ultrafast',
-          '-g 50',
-          '-sc_threshold 0',
-          '-map 0',
-          '-hls_time 10',
-          '-hls_list_size 0',
-          '-hls_allow_cache 1',
-          '-hls_flags delete_segments',
-          '-loglevel debug',
-          '-max_muxing_queue_size 2048', // Increase buffer size
-          '-c:v libx264',
-          '-b:v 1M',
-          '-analyzeduration 10000000', // Further increase duration for analysis
-          '-probesize 10000000', // Further increase probe size
+          '-fflags',
+          '+genpts',
+          '-flags',
+          '+global_header',
+          '-preset',
+          'ultrafast',
+          '-g',
+          '50',
+          '-sc_threshold',
+          '0',
+          '-map',
+          '0',
+          '-hls_time',
+          '10',
+          '-hls_list_size',
+          '0',
+          '-hls_allow_cache',
+          '1',
+          '-hls_flags',
+          'delete_segments',
+          '-loglevel',
+          'debug',
+          '-max_muxing_queue_size',
+          '2048',
+          '-c:v',
+          'libx264',
+          '-b:v',
+          '1M',
+          '-pix_fmt',
+          'yuv420p',
         ])
         .output(res)
         .format('hls')
+        .on('start', (commandLine) => {
+          console.log('FFmpeg process started:', commandLine);
+        })
         .on('end', () => {
           console.log('HLS streaming finished');
         })
