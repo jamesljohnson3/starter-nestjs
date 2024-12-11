@@ -2,12 +2,12 @@ import { Controller, Get, Res, Query } from '@nestjs/common';
 import { VideoStreamingService } from './videostreaming.service';
 import { Response } from 'express';
 
-@Controller('video')
+@Controller('stream')
 export class VideoStreamingController {
   constructor(private readonly videoStreamingService: VideoStreamingService) {}
 
   // Endpoint to stream video by ID
-  @Get('stream')
+  @Get('video')
   async streamVideo(@Query('id') id: string, @Res() res: Response) {
     if (!id) {
       return res.status(400).send('Video ID is required');
