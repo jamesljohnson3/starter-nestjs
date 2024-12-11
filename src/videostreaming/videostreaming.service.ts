@@ -14,7 +14,7 @@ export class VideoStreamingService {
 
   // Method to stream video in HLS format
   async streamVideo(id: string, res: Response) {
-    const videoUrl = `https://f004.backblazeb2.com/file/ok767777/SheltonHospitalistGroupClearspring%20HealthMedicareAdvantagePartnership.mp4`;  // Use video ID for dynamic URL in a real scenario
+    const videoUrl = `https://f004.backblazeb2.com/file/ok767777/baadad5a-66ef-44df-9cba-8b358c8dfbd5-file.mp4`;  // Use video ID for dynamic URL in a real scenario
 
     try {
       // Fetch the MP4 video from the URL
