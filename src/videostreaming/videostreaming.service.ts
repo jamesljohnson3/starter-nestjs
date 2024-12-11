@@ -15,7 +15,7 @@ export class VideoStreamingService {
     const videoUrl = `https://f004.backblazeb2.com/file/ok767777/baadad5a-66ef-44df-9cba-8b358c8dfbd5-file.mp4`;
 
     try {
-      const response = await axios.default.get(videoUrl, { responseType: 'stream' });
+      const response = await axios.default.get(videoUrl, { responseType: 'arraybuffer' });
 
       if (!response.data) {
         res.status(404).send('Video not found');
@@ -24,13 +24,13 @@ export class VideoStreamingService {
 
       res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
 
-      const hlsStream = ffmpeg(response.data)
+      // Create a Readable stream from the ArrayBuffer
+      const bufferStream = new Readable();
+      bufferStream.push(response.data);
+      bufferStream.push(null); // End the stream
+
+      const hlsStream = ffmpeg(bufferStream)
         .setFfmpegPath(this.ffmpegPath)
-        .inputFormat('mp4')
-        .inputOptions([
-          '-analyzeduration 100M',
-          '-probesize 100M'
-        ])
         .outputOptions([
           '-preset ultrafast',
           '-g 50',
@@ -44,16 +44,11 @@ export class VideoStreamingService {
           '-max_muxing_queue_size 1024',
           '-c:v libx264',
           '-b:v 1M',
-          '-pix_fmt yuv420p'
+          '-analyzeduration 5000000', // Increase analyzeduration
+          '-probesize 5000000' // Increase probesize
         ])
         .output(res)
         .format('hls')
-        .on('start', (commandLine) => {
-          console.log('FFmpeg process started:', commandLine);
-        })
-        .on('progress', (progress) => {
-          console.log('Processing: ' + progress.percent + '% done');
-        })
         .on('end', () => {
           console.log('HLS streaming finished');
         })
