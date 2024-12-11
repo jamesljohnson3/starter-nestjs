@@ -16,8 +16,8 @@ export class VideoStreamingService {
     const videoUrl = `https://f004.backblazeb2.com/file/ok767777/baadad5a-66ef-44df-9cba-8b358c8dfbd5-file.mp4`;  // Replace with actual video URL using `id`
 
     try {
-      // Fetch the MP4 video from the URL as an array buffer
-      const response = await axios.default.get(videoUrl, { responseType: 'arraybuffer' });
+      // Stream the video directly using axios with responseType 'stream'
+      const response = await axios.default.get(videoUrl, { responseType: 'stream' });
 
       if (!response.data) {
         res.status(404).send('Video not found');
@@ -27,13 +27,8 @@ export class VideoStreamingService {
       // Set the headers for the HLS stream response
       res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
 
-      // Use a stream from the response's arraybuffer
-      const bufferStream = new Readable();
-      bufferStream.push(response.data);
-      bufferStream.push(null);  // End the stream
-
-      // Streaming video via ffmpeg
-      const hlsStream = ffmpeg(bufferStream)
+      // Pass the stream directly to ffmpeg
+      const hlsStream = ffmpeg(response.data)
         .setFfmpegPath(this.ffmpegPath)
         .outputOptions([
           '-preset fast',
