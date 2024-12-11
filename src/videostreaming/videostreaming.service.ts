@@ -15,7 +15,7 @@ export class VideoStreamingService {
     const videoUrl = `https://f004.backblazeb2.com/file/ok767777/baadad5a-66ef-44df-9cba-8b358c8dfbd5-file.mp4`;
 
     try {
-      const response = await axios.default.get(videoUrl, { responseType: 'stream' });
+      const response = await axios.default.get(videoUrl, { responseType: 'arraybuffer' });
 
       if (!response.data) {
         res.status(404).send('Video not found');
@@ -24,36 +24,32 @@ export class VideoStreamingService {
 
       res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
 
-      const hlsStream = ffmpeg(response.data)
+      // Create a Readable stream from the ArrayBuffer
+      const bufferStream = new Readable();
+      bufferStream.push(response.data);
+      bufferStream.push(null); // End the stream
+
+      const hlsStream = ffmpeg(bufferStream)
         .setFfmpegPath(this.ffmpegPath)
-        .inputFormat('mp4')
-        .inputOptions([
-          '-analyzeduration', '10000000',
-          '-probesize', '10000000'
-        ])
         .outputOptions([
-          '-preset', 'ultrafast',
-          '-g', '50',
-          '-sc_threshold', '0',
-          '-map', '0',
-          '-hls_time', '10',
-          '-hls_list_size', '0',
-          '-hls_allow_cache', '1',
-          '-hls_flags', 'delete_segments',
-          '-loglevel', 'debug',
-          '-max_muxing_queue_size', '1024',
-          '-c:v', 'libx264',
-          '-b:v', '1M',
-          '-pix_fmt', 'yuv420p'
+          '-preset fast', // Use a more stable preset
+          '-g 50',
+          '-sc_threshold 0',
+          '-map 0',
+          '-hls_time 10',
+          '-hls_list_size 0',
+          '-hls_allow_cache 1',
+          '-hls_flags delete_segments',
+          '-loglevel debug',
+          '-max_muxing_queue_size 1024',
+          '-c:v libx264',
+          '-b:v 1M',
+          '-pix_fmt yuv420p', // Specify pixel format
+          '-analyzeduration 10000000', // Increase analyzeduration
+          '-probesize 10000000', // Increase probesize
         ])
         .output(res)
         .format('hls')
-        .on('start', (commandLine) => {
-          console.log('FFmpeg process started:', commandLine);
-        })
-        .on('progress', (progress) => {
-          console.log('Processing: ' + progress.percent + '% done');
-        })
         .on('end', () => {
           console.log('HLS streaming finished');
         })
@@ -76,3 +72,4 @@ export class VideoStreamingService {
     }
   }
 }
+
