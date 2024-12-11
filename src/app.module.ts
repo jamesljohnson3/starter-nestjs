@@ -29,6 +29,8 @@ import { MboxParserService } from './services/mbox-parser.service';
 import { EmailStreamModule } from './email-stream/email-stream.module';
 import { StreamEmailController } from './stream-email/stream-email.controller';
 import { StreamEmailModule } from './stream-email/stream-email.module';
+import { VideoStreamingModule } from './videostreaming/videostreaming.module';
+import { VideoStreamingController } from './videostreaming/videostreaming.controller';
 
 @Module({
   imports: [
@@ -46,6 +48,7 @@ import { StreamEmailModule } from './stream-email/stream-email.module';
     DataModule,
     EmailStreamModule,
     StreamEmailModule,
+    VideoStreamingModule
   ],
   controllers: [
     AppController,
@@ -59,6 +62,7 @@ import { StreamEmailModule } from './stream-email/stream-email.module';
     MboxToPdfController,
     EmailController,
     StreamEmailController,
+    VideoStreamingController
   ],
   providers: [
     EventsService,
