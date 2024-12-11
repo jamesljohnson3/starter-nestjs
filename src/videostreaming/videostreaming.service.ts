@@ -15,7 +15,9 @@ export class VideoStreamingService {
     const videoUrl = `https://f004.backblazeb2.com/file/ok767777/baadad5a-66ef-44df-9cba-8b358c8dfbd5-file.mp4`;
 
     try {
-      const response = await axios.default.get(videoUrl, { responseType: 'arraybuffer' });
+      const response = await axios.default.get(videoUrl, {
+        responseType: 'arraybuffer',
+      });
 
       if (!response.data) {
         res.status(404).send('Video not found');
