@@ -117,7 +117,6 @@ export class VideoStreamingService {
             stderr,
           });
           console.error('Complete FFmpeg Error:', {
-            commandLine: err.cmd,
             fullMessage: err.toString(),
           });
           if (!res.headersSent) {
