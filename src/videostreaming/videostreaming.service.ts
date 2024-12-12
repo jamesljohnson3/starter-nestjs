@@ -1,5 +1,5 @@
 import axios from 'axios';
-import stream from 'stream';
+import { Writable, Readable } from 'stream'; // Correct import for Writable and Readable
 import ffmpeg from 'fluent-ffmpeg';
 import { Injectable } from '@nestjs/common';
 import { Response } from 'express';
@@ -29,7 +29,7 @@ export class VideoStreamingService {
 
       // Buffer the entire stream to ensure complete data
       const chunks: Buffer[] = [];
-      const bufferStream = new stream.Writable({
+      const bufferStream = new Writable({
         write(chunk, encoding, callback) {
           chunks.push(chunk);
           callback();
@@ -47,7 +47,7 @@ export class VideoStreamingService {
       console.log('Buffered data size:', completeBuffer.length);
 
       // Create a readable stream from the buffered data
-      const inputStream = new stream.Readable({
+      const inputStream = new Readable({
         read() {
           this.push(completeBuffer);
           this.push(null); // Signal end of stream
