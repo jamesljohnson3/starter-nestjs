@@ -80,10 +80,14 @@ export class VideoStreamingService {
         ])
         .videoCodec('libx264')
         .outputOptions([
+          '-fflags',
+          '+genpts',
+          '-flags',
+          '+global_header',
           '-preset',
           'ultrafast',
           '-g',
-          '50', // GOP size
+          '50',
           '-sc_threshold',
           '0',
           '-map',
@@ -96,14 +100,16 @@ export class VideoStreamingService {
           '1',
           '-hls_flags',
           'delete_segments',
+          '-loglevel',
+          'debug',
           '-max_muxing_queue_size',
           '4096', // Increased queue size
+          '-c:v',
+          'libx264',
           '-b:v',
           '1M',
           '-pix_fmt',
           'yuv420p',
-          '-loglevel',
-          'debug', // Verbose logging
         ])
         .toFormat('hls')
         .output(res)
