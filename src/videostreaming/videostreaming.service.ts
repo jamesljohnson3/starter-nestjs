@@ -1,12 +1,13 @@
-import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import stream from 'stream';
 import ffmpeg from 'fluent-ffmpeg';
+import { Injectable } from '@nestjs/common';
 import { Response } from 'express';
+import ffmpegStatic from 'ffmpeg-static';
 
 @Injectable()
 export class VideoStreamingService {
-  private readonly ffmpegPath = ffmpeg;
+  private readonly ffmpegPath = ffmpegStatic;
 
   constructor() {}
 
@@ -15,6 +16,7 @@ export class VideoStreamingService {
       'https://f004.backblazeb2.com/file/ok767777/baadad5a-66ef-44df-9cba-8b358c8dfbd5-file.mp4';
 
     try {
+      // Fetch video stream
       const response = await axios.get(videoUrl, {
         responseType: 'stream',
         headers: { 'Accept-Encoding': 'identity' }, // Disable compression
@@ -55,6 +57,7 @@ export class VideoStreamingService {
       res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
 
       const hlsStream = ffmpeg(inputStream)
+        .setFfmpegPath(this.ffmpegPath)
         .inputFormat('mp4')
         .inputOptions([
           '-analyzeduration',
