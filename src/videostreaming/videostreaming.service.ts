@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Writable, Readable } from 'stream'; // Correct import for Writable and Readable
-import ffmpeg from 'fluent-ffmpeg'; // Ensure correct import style for fluent-ffmpeg
+import * as ffmpeg from 'fluent-ffmpeg'; // Named import if default import doesn't work
 import { Injectable } from '@nestjs/common';
 import { Response } from 'express';
 import ffmpegStatic from 'ffmpeg-static';
@@ -117,6 +117,7 @@ export class VideoStreamingService {
             stderr,
           });
           console.error('Complete FFmpeg Error:', {
+            commandLine: err,
             fullMessage: err.toString(),
           });
           if (!res.headersSent) {
