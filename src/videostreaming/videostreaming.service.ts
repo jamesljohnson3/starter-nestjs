@@ -1,9 +1,12 @@
 import axios from 'axios';
 import { Writable, Readable } from 'stream';
-import * as ffmpeg from 'fluent-ffmpeg';
 import { Injectable } from '@nestjs/common';
 import { Response } from 'express';
+import * as ffmpeg from 'fluent-ffmpeg';
 import ffmpegStatic from 'ffmpeg-static';
+
+// Set the FFmpeg binary path explicitly
+ffmpeg.setFfmpegPath(ffmpegStatic);
 
 @Injectable()
 export class VideoStreamingService {
