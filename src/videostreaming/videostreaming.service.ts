@@ -13,10 +13,10 @@ export class VideoStreamingService {
   private readonly ffmpegPath = ffmpegStatic;
 
   constructor() {
-    if (this.ffmpegPath) {
-      console.log('FFmpeg Path:', this.ffmpegPath);
-    } else {
+    if (!this.ffmpegPath) {
       console.error('FFmpeg binary not found!');
+    } else {
+      console.log('FFmpeg Path:', this.ffmpegPath); // Log the FFmpeg path for debugging
     }
   }
 
@@ -115,6 +115,7 @@ export class VideoStreamingService {
         })
         .on('end', () => {
           console.log('HLS streaming finished');
+          clearTimeout(streamTimeout); // Clear timeout on completion
           if (!res.headersSent) {
             res.end();
           }
@@ -129,6 +130,7 @@ export class VideoStreamingService {
             commandLine: err,
             fullMessage: err.toString(),
           });
+          clearTimeout(streamTimeout); // Make sure timeout is cleared on error
           if (!res.headersSent) {
             res.status(500).json({
               error: 'Video streaming failed',
@@ -141,14 +143,20 @@ export class VideoStreamingService {
       // Timeout handling with a longer timeout
       const streamTimeout = setTimeout(() => {
         console.error('Stream timeout');
-        hlsStream.kill('SIGTERM'); // Pass 'SIGTERM' to gracefully terminate the process
+        hlsStream.kill('SIGTERM'); // Gracefully terminate the process
         if (!res.headersSent) {
           res.status(504).send('Stream timeout');
         }
       }, 60000); // 60 seconds timeout
 
-      // Clear timeout on successful completion
-      hlsStream.on('end', () => clearTimeout(streamTimeout));
+      // Clear timeout on successful completion or error
+      hlsStream.on('end', () => {
+        clearTimeout(streamTimeout);
+      });
+
+      hlsStream.on('error', () => {
+        clearTimeout(streamTimeout); // Clear the timeout on error as well
+      });
 
       hlsStream.run();
     } catch (error) {
