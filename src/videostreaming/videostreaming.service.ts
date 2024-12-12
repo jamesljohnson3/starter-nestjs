@@ -1,6 +1,6 @@
 import axios from 'axios';
-import { Writable, Readable } from 'stream'; // Correct import for Writable and Readable
-import * as ffmpeg from 'fluent-ffmpeg'; // Named import if default import doesn't work
+import { Writable, Readable } from 'stream';
+import * as ffmpeg from 'fluent-ffmpeg';
 import { Injectable } from '@nestjs/common';
 import { Response } from 'express';
 import ffmpegStatic from 'ffmpeg-static';
@@ -9,7 +9,9 @@ import ffmpegStatic from 'ffmpeg-static';
 export class VideoStreamingService {
   private readonly ffmpegPath = ffmpegStatic;
 
-  constructor() {}
+  constructor() {
+    console.log('FFmpeg Path:', this.ffmpegPath); // Log the FFmpeg path for debugging
+  }
 
   async streamVideo(id: string, res: Response): Promise<void> {
     const videoUrl =
