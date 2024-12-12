@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 import { Injectable } from '@nestjs/common';
 import * as ffmpeg from 'fluent-ffmpeg';
 import * as ffmpegStatic from 'ffmpeg-static';
@@ -45,6 +44,7 @@ export class VideoStreamingService {
       });
 
       const completeBuffer = Buffer.concat(chunks);
+      console.log('Buffered data size:', completeBuffer.length);
 
       // Create a readable stream from the buffered data
       const inputStream = new stream.Readable({
@@ -74,7 +74,7 @@ export class VideoStreamingService {
           '-preset',
           'ultrafast',
           '-g',
-          '50',
+          '50', // GOP size
           '-sc_threshold',
           '0',
           '-map',
