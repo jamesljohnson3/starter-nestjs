@@ -61,18 +61,20 @@ export class VideoStreamingService {
         .inputFormat('mp4')
         .inputOptions([
           '-analyzeduration',
-          '20000000', // Increased from 10000000
+          '50000000', // Increased for deeper analysis
           '-probesize',
-          '20000000', // Increased from 10000000
+          '50000000', // Increased for deeper analysis
           '-fflags',
-          '+genpts+igndts+discardcorrupt', // Added discardcorrupt flag
+          '+genpts+igndts+discardcorrupt',
+          '-err_detect',
+          'ignore_err', // Ignore decoding errors
         ])
         .videoCodec('libx264')
         .outputOptions([
           '-preset',
           'ultrafast',
           '-g',
-          '50', // GOP size
+          '50',
           '-sc_threshold',
           '0',
           '-map',
@@ -86,11 +88,13 @@ export class VideoStreamingService {
           '-hls_flags',
           'delete_segments',
           '-max_muxing_queue_size',
-          '2048',
+          '4096', // Increased queue size
           '-b:v',
           '1M',
           '-pix_fmt',
           'yuv420p',
+          '-loglevel',
+          'debug', // Verbose logging
         ])
         .toFormat('hls')
         .output(res)
@@ -112,13 +116,10 @@ export class VideoStreamingService {
             stdout,
             stderr,
           });
-
-          // Log complete error details for debugging
           console.error('Complete FFmpeg Error:', {
             commandLine: err.cmd,
             fullMessage: err.toString(),
           });
-
           if (!res.headersSent) {
             res.status(500).json({
               error: 'Video streaming failed',
