@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Writable, Readable } from 'stream'; // Correct import for Writable and Readable
-import ffmpeg from 'fluent-ffmpeg';
+import ffmpeg from 'fluent-ffmpeg'; // Ensure correct import style for fluent-ffmpeg
 import { Injectable } from '@nestjs/common';
 import { Response } from 'express';
 import ffmpegStatic from 'ffmpeg-static';
@@ -56,7 +56,7 @@ export class VideoStreamingService {
 
       res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
 
-      const hlsStream = ffmpeg(inputStream)
+      const hlsStream = ffmpeg(inputStream) // Using the correct ffmpeg function
         .setFfmpegPath(this.ffmpegPath)
         .inputFormat('mp4')
         .inputOptions([
@@ -132,7 +132,7 @@ export class VideoStreamingService {
       // Timeout handling with a longer timeout
       const streamTimeout = setTimeout(() => {
         console.error('Stream timeout');
-        hlsStream.kill();
+        hlsStream.kill('SIGTERM'); // Pass 'SIGTERM' to gracefully terminate the process
         if (!res.headersSent) {
           res.status(504).send('Stream timeout');
         }
