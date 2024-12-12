@@ -10,7 +10,11 @@ export class VideoStreamingService {
   private readonly ffmpegPath = ffmpegStatic;
 
   constructor() {
-    console.log('FFmpeg Path:', this.ffmpegPath); // Log the FFmpeg path for debugging
+    if (this.ffmpegPath) {
+      console.log('FFmpeg Path:', this.ffmpegPath);
+    } else {
+      console.error('FFmpeg binary not found!');
+    }
   }
 
   async streamVideo(id: string, res: Response): Promise<void> {
@@ -59,7 +63,7 @@ export class VideoStreamingService {
       res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
 
       const hlsStream = ffmpeg(inputStream) // Using the correct ffmpeg function
-        .setFfmpegPath(this.ffmpegPath)
+        .setFfmpegPath(this.ffmpegPath) // Explicitly set the path
         .inputFormat('mp4')
         .inputOptions([
           '-analyzeduration',
