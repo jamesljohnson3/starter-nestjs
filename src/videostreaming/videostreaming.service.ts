@@ -18,6 +18,9 @@ export class VideoStreamingService {
     try {
       const response = await axios.default.get(videoUrl, {
         responseType: 'stream',
+        headers: {
+          'Accept-Encoding': 'identity', // Disable compression
+        },
       });
 
       if (!response.data) {
@@ -25,9 +28,31 @@ export class VideoStreamingService {
         return;
       }
 
-      // Create a pass-through stream to handle potential stream issues
-      const inputStream = new stream.PassThrough();
-      response.data.pipe(inputStream);
+      // Buffer the entire stream to ensure complete data
+      const chunks: Buffer[] = [];
+      const bufferStream = new stream.Writable({
+        write(chunk, encoding, callback) {
+          chunks.push(chunk);
+          callback();
+        },
+      });
+
+      await new Promise((resolve, reject) => {
+        response.data
+          .pipe(bufferStream)
+          .on('finish', resolve)
+          .on('error', reject);
+      });
+
+      const completeBuffer = Buffer.concat(chunks);
+
+      // Create a readable stream from the buffered data
+      const inputStream = new stream.Readable({
+        read() {
+          this.push(completeBuffer);
+          this.push(null); // Signal end of stream
+        },
+      });
 
       res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
 
@@ -35,13 +60,12 @@ export class VideoStreamingService {
         .setFfmpegPath(this.ffmpegPath)
         .inputFormat('mp4')
         .inputOptions([
-          '-re', // Read input at native frame rate (helps with streaming)
           '-analyzeduration',
-          '10000000',
+          '20000000', // Increased from 10000000
           '-probesize',
-          '10000000',
+          '20000000', // Increased from 10000000
           '-fflags',
-          '+genpts+igndts', // Ignore DTS and generate PTS
+          '+genpts+igndts+discardcorrupt', // Added discardcorrupt flag
         ])
         .videoCodec('libx264')
         .outputOptions([
@@ -89,23 +113,29 @@ export class VideoStreamingService {
             stderr,
           });
 
-          // Ensure response is not already sent
+          // Log complete error details for debugging
+          console.error('Complete FFmpeg Error:', {
+            commandLine: err.cmd,
+            fullMessage: err.toString(),
+          });
+
           if (!res.headersSent) {
             res.status(500).json({
               error: 'Video streaming failed',
               details: err.message,
+              fullError: err.toString(),
             });
           }
         });
 
-      // Timeout handling
+      // Timeout handling with longer timeout
       const streamTimeout = setTimeout(() => {
         console.error('Stream timeout');
         hlsStream.kill();
         if (!res.headersSent) {
           res.status(504).send('Stream timeout');
         }
-      }, 30000); // 30 second timeout
+      }, 60000); // Increased to 60 seconds
 
       // Clear timeout on successful completion
       hlsStream.on('end', () => clearTimeout(streamTimeout));
